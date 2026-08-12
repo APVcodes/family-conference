@@ -13,8 +13,8 @@ export const conference = {
   registration: {
     headline: "Registration",
     description:
-      "Sign-up information and family registration guidance are coming soon.",
-    cta: "Get registration updates",
+      "Marthoma North America Family Conference 2027",
+    cta: "Register Now",
   },
   contactEmail: "marthomadiocese@gmail.com",
   councilUrl: "https://marthomana.org/council-members/",
