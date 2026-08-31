@@ -6,7 +6,7 @@ import { aboutSections, conference } from "@/lib/site-content";
 export const metadata: Metadata = {
   title: "About",
   description:
-    "Learn about the Mar Thoma North America Diocese Family Conference 2027 — a gathering for every generation.",
+    "Learn about the Mar Thoma North America Diocese 36th Family Conference 2027 — a gathering for every generation.",
 };
 
 export default function AboutPage() {
@@ -22,7 +22,7 @@ export default function AboutPage() {
         <div className="mt-12 grid gap-8 lg:grid-cols-2">
           <div className="space-y-6 text-muted leading-relaxed">
             <p>
-              The Mar Thoma North America Diocese Family Conference brings together families
+              The Mar Thoma North America Diocese 36th Family Conference brings together families
               from parishes across the continent for worship, fellowship, and spiritual
               renewal. It is a time to reconnect with friends, meet new members of our
               diocesan community, and grow together in faith.
@@ -36,7 +36,8 @@ export default function AboutPage() {
             <p>
               Conference dates are <strong className="text-foreground">{conference.dates}</strong>,
               hosted at the{" "}
-              <strong className="text-foreground">{conference.venue.name}</strong>.
+              <strong className="text-foreground">{conference.venue.name}</strong>{" "}
+              ({conference.venue.address}).
             </p>
           </div>
 
@@ -54,6 +55,7 @@ export default function AboutPage() {
                   Location
                 </dt>
                 <dd className="mt-1 font-medium">{conference.venue.name}</dd>
+              <dd className="mt-1 text-sm text-muted">{conference.venue.address}</dd>
               </div>
               <div>
                 <dt className="text-xs font-semibold uppercase tracking-wider text-brand">

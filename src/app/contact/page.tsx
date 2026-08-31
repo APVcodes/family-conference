@@ -4,7 +4,7 @@ import { conference } from "@/lib/site-content";
 
 export const metadata: Metadata = {
   title: "Contact",
-  description: "Contact the Mar Thoma Diocese of North America about the Family Conference 2027.",
+  description: "Contact the Mar Thoma Diocese of North America about the 36th Family Conference 2027.",
 };
 
 export default function ContactPage() {
@@ -13,7 +13,7 @@ export default function ContactPage() {
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
         <SectionHeading
           eyebrow="Get in Touch"
-          title="Questions about the Family Conference?"
+          title="Questions about the 36th Family Conference?"
           description="Reach out to the Diocese office for registration updates, travel questions, or general conference information."
         />
 
@@ -21,7 +21,7 @@ export default function ContactPage() {
           <div className="rounded-2xl border border-border bg-surface p-8 shadow-sm">
             <h3 className="text-lg font-semibold">Diocese Office</h3>
             <p className="mt-4 text-sm leading-relaxed text-muted">
-              For questions about the Family Conference, registration, accommodations, or
+              For questions about the 36th Family Conference, registration, accommodations, or
               program details, please contact the Diocese of North America office.
             </p>
             <a
@@ -55,6 +55,7 @@ export default function ContactPage() {
                   Venue
                 </dt>
                 <dd className="mt-1 font-medium">{conference.venue.name}</dd>
+                <dd className="mt-1 text-sm text-muted">{conference.venue.address}</dd>
               </div>
               <div>
                 <dt className="text-xs font-semibold uppercase tracking-wider text-brand">

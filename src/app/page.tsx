@@ -14,7 +14,7 @@ export default function HomePage() {
             {conference.organization}
           </p>
           <p className="mt-3 text-sm font-medium uppercase tracking-widest text-white/70">
-            Family Conference · 2027
+            36th Family Conference · 2027
           </p>
           <h1
             className="mt-4 max-w-3xl font-[family-name:var(--font-display)] text-4xl font-semibold leading-tight tracking-tight sm:text-5xl lg:text-6xl"
@@ -84,8 +84,9 @@ export default function HomePage() {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
               </div>
-              <h3 className="text-lg font-semibold">Venue &amp; travel</h3>
-              <p className="mt-2 text-sm leading-relaxed text-muted">{conference.venue.name}</p>
+               <h3 className="text-lg font-semibold">Venue &amp; travel</h3>
+               <p className="mt-2 text-sm leading-relaxed text-muted">{conference.venue.name}</p>
+               <p className="mt-1 text-sm leading-relaxed text-muted">{conference.venue.address}</p>
             </article>
           </div>
         </div>
@@ -96,7 +97,7 @@ export default function HomePage() {
           <div className="grid items-center gap-10 lg:grid-cols-2">
             <div className="relative aspect-[4/3] overflow-hidden rounded-2xl shadow-lg">
               <Image
-                src="images/venue.webp"
+                 src="/images/venue.webp"
                 alt={conference.venue.name}
                 fill
                 className="object-cover"
@@ -107,10 +108,11 @@ export default function HomePage() {
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand">
                 {conference.venue.label}
               </p>
-              <h2 className="mt-2 font-[family-name:var(--font-display)] text-3xl font-semibold tracking-tight sm:text-4xl">
-                {conference.venue.name}
-              </h2>
-              <p className="mt-4 text-lg font-medium text-brand">{conference.dates}</p>
+               <h2 className="mt-2 font-[family-name:var(--font-display)] text-3xl font-semibold tracking-tight sm:text-4xl">
+                 {conference.venue.name}
+               </h2>
+               <p className="mt-1 text-muted">{conference.venue.address}</p>
+               <p className="mt-4 text-lg font-medium text-brand">{conference.dates}</p>
               <p className="mt-4 text-muted leading-relaxed">
                 Join Mar Thoma families from across North America for four days of worship,
                 fellowship, and community at this welcoming conference center.

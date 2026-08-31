@@ -6,7 +6,7 @@ import { souvenirs } from "@/lib/site-content";
 export const metadata: Metadata = {
   title: "Souvenir",
   description:
-    "Conference souvenirs and keepsakes for the Mar Thoma Family Conference 2027.",
+    "Conference souvenirs and keepsakes for the Mar Thoma 36th Family Conference 2027.",
 };
 
 export default function SouvenirPage() {
@@ -16,7 +16,7 @@ export default function SouvenirPage() {
         <SectionHeading
           eyebrow="Conference Keepsakes"
           title="Souvenirs & memorabilia."
-          description="Commemorative items to remember your time at the 2027 Family Conference. Details and ordering information will be shared closer to the event."
+          description="Commemorative items to remember your time at the 2027 36th Family Conference. Details and ordering information will be shared closer to the event."
         />
 
         <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">

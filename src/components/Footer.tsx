@@ -38,7 +38,7 @@ export default function Footer() {
               Contact
             </p>
             <p className="mt-3 text-sm text-white/80">
-              Questions about the Family Conference?
+              Questions about the 36th Family Conference?
             </p>
             <a
               href={`mailto:${conference.contactEmail}`}

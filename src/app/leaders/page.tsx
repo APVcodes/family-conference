@@ -7,7 +7,7 @@ import { bishop, conference } from "@/lib/site-content";
 export const metadata: Metadata = {
   title: "Leaders",
   description:
-    "Meet the diocesan leadership guiding the Mar Thoma North America Family Conference 2027.",
+    "Meet the diocesan leadership guiding the Mar Thoma North America 36th Family Conference 2027.",
 };
 
 export default function LeadersPage() {
@@ -17,7 +17,7 @@ export default function LeadersPage() {
         <SectionHeading
           eyebrow="Diocesan Leadership"
           title="Guided by faithful leadership."
-          description="The Family Conference is hosted under the spiritual guidance of the Diocese of North America."
+          description="The 36th Family Conference is hosted under the spiritual guidance of the Diocese of North America."
         />
 
         <div className="mt-12 overflow-hidden rounded-2xl border border-border bg-surface shadow-sm">
@@ -42,7 +42,7 @@ export default function LeadersPage() {
               <p className="mt-2 text-lg font-medium text-brand">{bishop.title}</p>
               <p className="mt-1 text-muted">{bishop.organization}</p>
               <p className="mt-6 leading-relaxed text-muted">
-                Under the leadership of our Diocesan Bishop, the Family Conference brings
+                 Under the leadership of our Diocesan Bishop, the 36th Family Conference brings
                 together parishes across North America for worship, fellowship, and shared
                 mission. Additional council and committee members will be listed here as
                 conference planning continues.

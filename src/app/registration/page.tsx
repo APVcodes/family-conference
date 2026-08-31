@@ -5,7 +5,7 @@ import { conference } from "@/lib/site-content";
 
 export const metadata: Metadata = {
   title: "Registration",
-  description: "Registration information for the Mar Thoma Family Conference 2027.",
+  description: "Registration information for the Mar Thoma 36th Family Conference 2027.",
 };
 
 export default function RegistrationPage() {

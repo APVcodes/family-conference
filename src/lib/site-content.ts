@@ -1,19 +1,20 @@
 export const conference = {
-  title: "Mar Thoma North America Diocese Family Conference 2027",
-  shortTitle: "Family Conference 2027",
+  title: "Mar Thoma North America Diocese 36th Family Conference 2027",
+  shortTitle: "36th Family Conference 2027",
   tagline: "Gather in faith. Grow in fellowship.",
   subtitle:
     "A welcoming gathering for Mar Thoma families across North America. Conference dates, venue, registration, and program details will be announced here.",
   organization: "Mar Thoma Church · Diocese of North America",
   dates: "July 1–4, 2027",
   venue: {
-    name: "Hilton Chicago/Oak Brook Hills Resort & Conference Center",
-    label: "2027 Family Conference Venue",
+    name: "Double Tree by Hilton",
+    address: "1909 Spring Road, Oak Brook, IL 60523",
+    label: "36th Family Conference Venue",
   },
   registration: {
     headline: "Registration",
     description:
-      "Marthoma North America Family Conference 2027",
+      "Marthoma North America 36th Family Conference 2027",
     cta: "Register Now",
   },
   contactEmail: "marthomadiocese@gmail.com",
@@ -24,7 +25,7 @@ export const bishop = {
   name: "Rt. Rev. Dr. Abraham Mar Paulos Episcopa",
   title: "Diocesan Bishop",
   organization: "Diocese of North America · Mar Thoma Church",
-  image: "images/bishop.jpg",
+  image: "/images/bishop.webp",
 };
 
 export const aboutSections = [
@@ -48,7 +49,7 @@ export const aboutSections = [
 export const promoVideos = [
   {
     id: "promo-1",
-    title: "Family Conference Promo",
+    title: "36th Family Conference Promo",
     description: "A glimpse of fellowship, worship, and community.",
     embedUrl: "",
   },
