@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import SectionHeading from "@/components/SectionHeading";
 import VideoReels from "@/components/VideoReels";
-import { aboutSections, conference } from "@/lib/site-content";
+import { aboutSections, conference, publicAssetBase } from "@/lib/site-content";
 
 export default function HomePage() {
   return (
@@ -97,7 +97,7 @@ export default function HomePage() {
           <div className="grid items-center gap-10 lg:grid-cols-2">
             <div className="relative aspect-[4/3] overflow-hidden rounded-2xl shadow-lg">
               <Image
-                 src="/images/venue.webp"
+                src={`${publicAssetBase}/images/venue.webp`}
                 alt={conference.venue.name}
                 fill
                 className="object-cover"

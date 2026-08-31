@@ -1,3 +1,6 @@
+export const publicAssetBase =
+  process.env.GITHUB_PAGES === "true" ? "/family-conference" : "";
+
 export const conference = {
   title: "Mar Thoma North America Diocese 36th Family Conference 2027",
   shortTitle: "36th Family Conference 2027",
@@ -25,7 +28,7 @@ export const bishop = {
   name: "Rt. Rev. Dr. Abraham Mar Paulos Episcopa",
   title: "Diocesan Bishop",
   organization: "Diocese of North America · Mar Thoma Church",
-  image: "/images/bishop.webp",
+  image: `${publicAssetBase}/images/bishop.webp`,
 };
 
 export const aboutSections = [

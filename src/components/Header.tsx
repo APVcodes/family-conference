@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { navLinks } from "@/lib/navigation";
+import { publicAssetBase } from "@/lib/site-content";
 
 function NavLink({
   href,
@@ -51,7 +52,7 @@ export default function Header() {
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6">
         <Link href="/" className="flex items-center gap-3" onClick={() => setMenuOpen(false)}>
           <Image
-             src="/images/logo.webp"
+            src={`${publicAssetBase}/images/logo.webp`}
             alt="Mar Thoma Diocese of North America"
             width={140}
             height={40}
