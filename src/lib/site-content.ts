@@ -17,7 +17,7 @@ export const conference = {
   registration: {
     headline: "Registration",
     description:
-      "Marthoma North America 36th Family Conference 2027",
+      "Mar Thoma North America 36th Family Conference 2027",
     cta: "Register Now",
   },
   contactEmail: "marthomadiocese@gmail.com",
