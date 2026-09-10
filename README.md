@@ -22,17 +22,8 @@ Static files are output to the `out/` directory.
 ## Deploy to GitHub Pages
 
 1. Push this repository to GitHub.
-2. If deploying to a **project site** (e.g. `username.github.io/family-conference`), set `basePath` in `next.config.ts`:
-
-   ```ts
-   basePath: "/family-conference",
-   assetPrefix: "/family-conference/",
-   ```
-
-3. Build the site: `npm run build`
-4. Deploy the `out/` folder to GitHub Pages (via GitHub Actions or by pushing `out/` to a `gh-pages` branch).
-
-For a **user/organization site** (`username.github.io`), no `basePath` is needed.
+2. Build the site: `npm run build`
+3. Deploy the `out/` folder to GitHub Pages (via GitHub Actions or by pushing `out/` to a `gh-pages` branch).
 
 ## Pages
 
