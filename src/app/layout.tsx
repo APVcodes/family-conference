@@ -23,6 +23,14 @@ export const metadata: Metadata = {
     template: `%s | ${conference.shortTitle}`,
   },
   description: conference.subtitle,
+  icons: {
+    icon: [
+      { url: "/brand-icon.png", type: "image/png", sizes: "512x512" },
+      { url: "/favicon.ico", sizes: "32x32" },
+    ],
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180" }],
+    shortcut: "/brand-icon.png",
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
