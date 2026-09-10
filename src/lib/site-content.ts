@@ -28,6 +28,21 @@ export const bishop = {
   image: "/images/bishop.webp",
 };
 
+export const sampleAgenda = {
+  dayLabel: "Day 1 - Agenda",
+  date: "Friday, July 2",
+  note: "A preview of one conference day. Full schedule coming soon.",
+  items: [
+    { time: "7:30 AM", title: "Morning Prayer", detail: "Chapel" },
+    { time: "9:00 AM", title: "Opening Worship", detail: "Main hall" },
+    { time: "10:30 AM", title: "Bible Study", detail: "Adults, youth & children" },
+    { time: "12:30 PM", title: "Family Lunch", detail: "Dining hall" },
+    { time: "2:00 PM", title: "Workshops & Fellowship", detail: "Breakout sessions" },
+    { time: "6:00 PM", title: "Evening Worship", detail: "Main hall" },
+    { time: "8:00 PM", title: "Family Night", detail: "Games, music & community" },
+  ],
+};
+
 export const aboutSections = [
   {
     title: "Stay together",
@@ -51,13 +66,13 @@ export const promoVideos = [
     id: "promo-1",
     title: "36th Family Conference Promo",
     description: "A glimpse of fellowship, worship, and community.",
-    embedUrl: "",
+    embedUrl: "https://www.youtube.com/embed/mkBI9lEIE5c",
   },
   {
     id: "promo-2",
     title: "Highlights Reel",
     description: "Moments from past diocesan gatherings.",
-    embedUrl: "",
+    embedUrl: "https://www.youtube.com/embed/zl_mTp5uqVQ",
   },
 ];
 

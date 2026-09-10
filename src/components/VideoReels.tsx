@@ -34,10 +34,6 @@ export default function VideoReels() {
           <h2 className="mt-2 text-2xl font-bold tracking-tight sm:text-3xl">
             Reels &amp; Promo Videos
           </h2>
-          <p className="mx-auto mt-3 max-w-xl text-muted">
-            Promotional videos and highlight reels will be posted here as they become
-            available.
-          </p>
         </div>
 
         <div className="grid gap-6 sm:grid-cols-2">
@@ -51,7 +47,8 @@ export default function VideoReels() {
                   src={video.embedUrl}
                   title={video.title}
                   className="aspect-video w-full"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  referrerPolicy="strict-origin-when-cross-origin"
                   allowFullScreen
                 />
               </div>

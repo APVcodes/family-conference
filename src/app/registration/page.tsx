@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Script from "next/script";
+import FormesterForm from "@/components/FormesterForm";
 import SectionHeading from "@/components/SectionHeading";
 import { conference } from "@/lib/site-content";
 
@@ -28,14 +29,7 @@ export default function RegistrationPage() {
       />
 
       <div className="mx-auto mt-12 w-full max-w-4xl px-4 sm:px-6">
-        <formester-standard-form
-          set-auto-height="true"
-          height="100%"
-          width="100%"
-          id="8Cci8mm9c"
-          url="https://aihrkgqy.formester.com/f/8Cci8mm9c"
-          className="block w-full"
-        ></formester-standard-form>
+        <FormesterForm />
       </div>
     </div>
   );
