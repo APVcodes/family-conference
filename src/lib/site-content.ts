@@ -28,20 +28,55 @@ export const bishop = {
   image: "/images/bishop.webp",
 };
 
-export const sampleAgenda = {
-  dayLabel: "Day 1 - Agenda",
-  date: "Friday, July 2",
-  note: "A preview of one conference day. Full schedule coming soon.",
-  items: [
-    { time: "7:30 AM", title: "Morning Prayer", detail: "Chapel" },
-    { time: "9:00 AM", title: "Opening Worship", detail: "Main hall" },
-    { time: "10:30 AM", title: "Bible Study", detail: "Adults, youth & children" },
-    { time: "12:30 PM", title: "Family Lunch", detail: "Dining hall" },
-    { time: "2:00 PM", title: "Workshops & Fellowship", detail: "Breakout sessions" },
-    { time: "6:00 PM", title: "Evening Worship", detail: "Main hall" },
-    { time: "8:00 PM", title: "Family Night", detail: "Games, music & community" },
-  ],
+export type AgendaDay = {
+  dayLabel: string;
+  date: string;
+  note: string;
+  items: { time: string; title: string; detail: string }[];
 };
+
+export const sampleAgendas: AgendaDay[] = [
+  {
+    dayLabel: "Day 1 - Agenda",
+    date: "Friday, July 2",
+    note: "A preview of one conference day. Full schedule coming soon.",
+    items: [
+      { time: "7:30 AM", title: "Morning Prayer", detail: "Chapel" },
+      { time: "9:00 AM", title: "Opening Worship", detail: "Main hall" },
+      { time: "10:30 AM", title: "Bible Study", detail: "Adults, youth & children" },
+      { time: "12:30 PM", title: "Family Lunch", detail: "Dining hall" },
+      { time: "2:00 PM", title: "Workshops & Fellowship", detail: "Breakout sessions" },
+      { time: "6:00 PM", title: "Evening Worship", detail: "Main hall" },
+      { time: "8:00 PM", title: "Family Night", detail: "Games, music & community" },
+    ],
+  },
+  {
+    dayLabel: "Day 2 - Agenda",
+    date: "Saturday, July 3",
+    note: "A preview of one conference day. Full schedule coming soon.",
+    items: [
+      { time: "7:30 AM", title: "Morning Prayer", detail: "Chapel" },
+      { time: "9:00 AM", title: "Holy Qurbana", detail: "Main hall" },
+      { time: "11:00 AM", title: "Keynote Session", detail: "Main hall" },
+      { time: "12:30 PM", title: "Family Lunch", detail: "Dining hall" },
+      { time: "2:00 PM", title: "Youth & Children's Programs", detail: "Breakout rooms" },
+      { time: "4:00 PM", title: "Parish Fellowship Time", detail: "Campus grounds" },
+      { time: "6:30 PM", title: "Cultural Night", detail: "Main hall" },
+    ],
+  },
+  {
+    dayLabel: "Day 3 - Agenda",
+    date: "Sunday, July 4",
+    note: "A preview of one conference day. Full schedule coming soon.",
+    items: [
+      { time: "7:30 AM", title: "Morning Prayer", detail: "Chapel" },
+      { time: "9:00 AM", title: "Sunday Worship", detail: "Main hall" },
+      { time: "11:00 AM", title: "Closing Message", detail: "Main hall" },
+      { time: "12:30 PM", title: "Farewell Lunch", detail: "Dining hall" },
+      { time: "2:00 PM", title: "Group Photos & Send-off", detail: "Venue lobby" },
+    ],
+  },
+];
 
 export const aboutSections = [
   {

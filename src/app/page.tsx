@@ -1,8 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
+import AgendaPreview from "@/components/AgendaPreview";
 import SectionHeading from "@/components/SectionHeading";
 import VideoReels from "@/components/VideoReels";
-import { aboutSections, conference, sampleAgenda } from "@/lib/site-content";
+import { aboutSections, conference, sampleAgendas } from "@/lib/site-content";
 
 export default function HomePage() {
   return (
@@ -41,38 +42,7 @@ export default function HomePage() {
             </div>
           </div>
 
-          <aside className="rounded-[1.75rem] border border-white/15 bg-white/10 p-5 shadow-[0_20px_50px_rgba(0,0,0,0.18)] backdrop-blur-sm sm:p-6">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-accent-light">
-                  {sampleAgenda.dayLabel}
-                </p>
-                <h2 className="mt-1 font-[family-name:var(--font-display)] text-2xl font-semibold tracking-tight">
-                  {sampleAgenda.date}
-                </h2>
-              </div>
-              <span className="rounded-full bg-white/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-white/80">
-                Preview
-              </span>
-            </div>
-            <p className="mt-2 text-sm text-white/70">{sampleAgenda.note}</p>
-            <ol className="mt-5 space-y-3">
-              {sampleAgenda.items.map((item) => (
-                <li
-                  key={`${item.time}-${item.title}`}
-                  className="grid grid-cols-[5.5rem_1fr] gap-3 border-t border-white/10 pt-3 first:border-t-0 first:pt-0"
-                >
-                  <p className="text-sm font-semibold tabular-nums text-accent-light">
-                    {item.time}
-                  </p>
-                  <div>
-                    <p className="text-sm font-semibold leading-snug">{item.title}</p>
-                    <p className="mt-0.5 text-xs text-white/65">{item.detail}</p>
-                  </div>
-                </li>
-              ))}
-            </ol>
-          </aside>
+          <AgendaPreview days={sampleAgendas} />
         </div>
       </section>
 
