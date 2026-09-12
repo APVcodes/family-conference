@@ -1,13 +1,15 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import PlaceDirectionsList from "@/components/PlaceDirectionsList";
 import SectionHeading from "@/components/SectionHeading";
+import { chicagoFoodSpots, chicagoLandmarks } from "@/lib/chicago-places";
 import { conference } from "@/lib/site-content";
 
 export const metadata: Metadata = {
   title: "Chicago",
   description:
-    "Explore Chicago, Illinois — host city region for the Mar Thoma North America 36th Family Conference 2027.",
+    "Explore Chicago landmarks and food spots with map directions for the Mar Thoma North America 36th Family Conference 2027.",
 };
 
 const highlights = [
@@ -53,6 +55,20 @@ export default function ChicagoPage() {
             a place of skyline views, lakefront walks, and easy travel for families coming
             from near and far.
           </p>
+          <div className="mt-8 flex flex-wrap gap-3">
+            <a
+              href="#landmarks"
+              className="inline-flex items-center justify-center rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-brand-dark transition-colors hover:bg-accent-light"
+            >
+              Landmarks
+            </a>
+            <a
+              href="#food"
+              className="inline-flex items-center justify-center rounded-full border border-white/35 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-white/10"
+            >
+              Food spots
+            </a>
+          </div>
         </div>
       </section>
 
@@ -74,6 +90,34 @@ export default function ChicagoPage() {
                 <p className="mt-2 text-sm leading-relaxed text-muted">{item.description}</p>
               </article>
             ))}
+          </div>
+        </div>
+      </section>
+
+      <section id="landmarks" className="scroll-mt-24 bg-surface-muted py-14 sm:py-20">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6">
+          <SectionHeading
+            eyebrow="Landmarks"
+            title="Places worth putting on the map."
+            description="Tap Directions to open Google Maps from your phone or computer."
+            titleId="landmarks-heading"
+          />
+          <div className="mt-10">
+            <PlaceDirectionsList places={chicagoLandmarks} headingId="landmarks-heading" />
+          </div>
+        </div>
+      </section>
+
+      <section id="food" className="scroll-mt-24 py-14 sm:py-20">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6">
+          <SectionHeading
+            eyebrow="Food spots"
+            title="Popular places to eat in Chicago."
+            description="A short list of well-known Chicago favorites — deep dish, dogs, and more — each with a directions link."
+            titleId="food-heading"
+          />
+          <div className="mt-10">
+            <PlaceDirectionsList places={chicagoFoodSpots} headingId="food-heading" />
           </div>
         </div>
       </section>
@@ -103,17 +147,19 @@ export default function ChicagoPage() {
               during your stay.
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <Link
-                href="/registration/"
+              <a
+                href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(conference.venue.address)}`}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="inline-flex items-center justify-center rounded-full bg-brand px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-light"
               >
-                {conference.registration.cta}
-              </Link>
+                Directions to venue
+              </a>
               <Link
-                href="/about/"
+                href="/registration/"
                 className="inline-flex items-center justify-center rounded-full border border-border px-6 py-3 text-sm font-semibold text-foreground transition-colors hover:bg-surface"
               >
-                About the conference
+                {conference.registration.cta}
               </Link>
             </div>
           </div>

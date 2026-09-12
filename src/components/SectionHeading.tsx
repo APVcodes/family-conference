@@ -3,11 +3,13 @@ export default function SectionHeading({
   title,
   description,
   align = "left",
+  titleId,
 }: {
   eyebrow?: string;
   title: string;
   description?: string;
   align?: "left" | "center";
+  titleId?: string;
 }) {
   const alignment = align === "center" ? "text-center mx-auto" : "text-left";
 
@@ -18,7 +20,10 @@ export default function SectionHeading({
           {eyebrow}
         </p>
       )}
-      <h2 className="mt-2 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+      <h2
+        id={titleId}
+        className="mt-2 text-2xl font-bold tracking-tight text-foreground sm:text-3xl"
+      >
         {title}
       </h2>
       {description && (
