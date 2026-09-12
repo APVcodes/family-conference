@@ -3,6 +3,7 @@ import { Cormorant_Garamond, DM_Sans } from "next/font/google";
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
 import { conference } from "@/lib/site-content";
+import { siteUrl } from "@/lib/site-url";
 import "./globals.css";
 
 const dmSans = DM_Sans({
@@ -18,11 +19,28 @@ const cormorant = Cormorant_Garamond({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title: {
     default: conference.title,
     template: `%s | ${conference.shortTitle}`,
   },
   description: conference.subtitle,
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+    },
+  },
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: siteUrl,
+    siteName: conference.shortTitle,
+    title: conference.title,
+    description: conference.subtitle,
+  },
   icons: {
     icon: [
       { url: "/brand-icon.png", type: "image/png", sizes: "512x512" },
