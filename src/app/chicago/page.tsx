@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import PlaceDirectionsList from "@/components/PlaceDirectionsList";
 import SectionHeading from "@/components/SectionHeading";
-import { chicagoFoodSpots, chicagoLandmarks } from "@/lib/chicago-places";
+import { chicagoFoodSpots, chicagoLandmarks, extremeFoodiesMap } from "@/lib/chicago-places";
 import { conference } from "@/lib/site-content";
 
 export const metadata: Metadata = {
@@ -119,6 +119,31 @@ export default function ChicagoPage() {
           <div className="mt-10">
             <PlaceDirectionsList places={chicagoFoodSpots} headingId="food-heading" />
           </div>
+
+          <aside className="mt-8 flex flex-col gap-4 border border-brand/20 bg-brand/[0.04] px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand">
+                For extreme foodies
+              </p>
+              <h3 className="mt-1 text-lg font-semibold text-foreground">
+                {extremeFoodiesMap.name}
+              </h3>
+              <p className="mt-1 max-w-2xl text-sm leading-relaxed text-muted">
+                {extremeFoodiesMap.blurb}
+              </p>
+            </div>
+            <a
+              href={extremeFoodiesMap.mapsUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex shrink-0 items-center justify-center gap-2 rounded-full bg-brand px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-light"
+            >
+              Open map
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+              </svg>
+            </a>
+          </aside>
         </div>
       </section>
 

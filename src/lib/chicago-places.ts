@@ -2,7 +2,9 @@ export type ChicagoPlace = {
   name: string;
   blurb: string;
   /** Address or place query used for Google Maps directions */
-  mapsQuery: string;
+  mapsQuery?: string;
+  /** Optional direct Maps URL (lists, short links, etc.) */
+  mapsUrl?: string;
 };
 
 export const chicagoLandmarks: ChicagoPlace[] = [
@@ -71,6 +73,17 @@ export const chicagoFoodSpots: ChicagoPlace[] = [
   },
 ];
 
-export function mapsDirectionsUrl(mapsQuery: string) {
-  return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(mapsQuery)}`;
+export const extremeFoodiesMap = {
+  name: "Extreme Foodies Map",
+  blurb:
+    "A curated Google Maps list for adventurous eaters ready to go beyond the classics.",
+  mapsUrl: "https://maps.app.goo.gl/k3jfyDkgHmduDi9X8?g_st=i",
+} as const;
+
+export function mapsDirectionsUrl(place: Pick<ChicagoPlace, "mapsQuery" | "mapsUrl">) {
+  if (place.mapsUrl) return place.mapsUrl;
+  if (!place.mapsQuery) {
+    throw new Error("Chicago place is missing mapsQuery or mapsUrl");
+  }
+  return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(place.mapsQuery)}`;
 }

@@ -27,7 +27,7 @@ export default function PlaceDirectionsList({
             </p>
           </div>
           <a
-            href={mapsDirectionsUrl(place.mapsQuery)}
+            href={mapsDirectionsUrl(place)}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex shrink-0 items-center justify-center gap-2 self-start rounded-full border border-border bg-surface px-4 py-2 text-sm font-semibold text-brand transition-colors hover:border-brand hover:bg-brand hover:text-white sm:self-center"
