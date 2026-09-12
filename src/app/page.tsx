@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import AgendaPreview from "@/components/AgendaPreview";
+import ChicagoScrollReveal from "@/components/ChicagoScrollReveal";
 import SectionHeading from "@/components/SectionHeading";
 import VideoReels from "@/components/VideoReels";
 import { aboutSections, conference, sampleAgendas } from "@/lib/site-content";
@@ -45,6 +46,8 @@ export default function HomePage() {
           <AgendaPreview days={sampleAgendas} />
         </div>
       </section>
+
+      <ChicagoScrollReveal />
 
       <section className="py-16 sm:py-20">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
