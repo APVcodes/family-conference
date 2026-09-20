@@ -21,11 +21,50 @@ export const conference = {
   councilUrl: "https://marthomana.org/council-members/",
 };
 
+export const theme = {
+  title: "Faith Life: Rooted in Christ, Routed through the Family",
+  malayalam: "വിശ്വാസജീവിതം: ക്രിസ്തുവിൽ വേരൂന്നി, കുടുംബ വഴികളിലൂടെ",
+  verse: "2 Timothy 1:5",
+};
+
 export const bishop = {
   name: "Rt. Rev. Dr. Abraham Mar Paulos Episcopa",
   title: "Diocesan Bishop",
   organization: "Diocese of North America · Mar Thoma Church",
-  image: "/images/bishop.webp",
+  image: "/images/DrAbrahamMarPaulos.webp",
+};
+
+export const speakers = [
+  {
+    name: "Rt. Rev. PD Dr. Joseph Mar Ivanios Episcopa",
+    role: "Chief Guest",
+  },
+  {
+    name: "Rev. K E Geevarghese",
+    role: "Main Speaker",
+  },
+];
+
+export type PricingTier = {
+  label: string;
+  single: string;
+  double: string;
+  family: string;
+};
+
+export const pricing: { earlyBird: PricingTier; regular: PricingTier } = {
+  earlyBird: {
+    label: "Early Bird Pricing",
+    single: "$899",
+    double: "$1,499",
+    family: "$1,999",
+  },
+  regular: {
+    label: "Regular Pricing",
+    single: "$950",
+    double: "$1,600",
+    family: "$2,200",
+  },
 };
 
 export type AgendaDay = {
@@ -110,6 +149,22 @@ export const promoVideos = [
     embedUrl: "https://www.youtube.com/embed/zl_mTp5uqVQ",
   },
 ];
+
+export const souvenirSubmission = {
+  eyebrow: "Souvenir Committee",
+  title: "Submit your memory for the souvenir.",
+  description:
+    "Share photos and a short write-up for the 36th Family Conference souvenir booklet. Submissions are reviewed by the souvenir review board before anything is included.",
+  guidelines: [
+    "Upload 2–3 images (JPG or PNG).",
+    "Write between 1,000 and 1,500 characters describing your memory, family, or parish.",
+    "Submissions are for review only — approval does not guarantee inclusion in the final booklet.",
+  ],
+  // Fill these in after creating the form in the Formester dashboard.
+  // See docs/souvenir-review-setup.md.
+  formesterId: "REPLACE_WITH_FORMESTER_FORM_ID",
+  formesterUrl: "REPLACE_WITH_FORMESTER_FORM_URL",
+};
 
 export const souvenirs = [
   {

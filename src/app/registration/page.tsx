@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Script from "next/script";
 import FormesterForm from "@/components/FormesterForm";
 import SectionHeading from "@/components/SectionHeading";
-import { conference } from "@/lib/site-content";
+import { conference, pricing } from "@/lib/site-content";
 
 export const metadata: Metadata = {
   title: "Registration",
@@ -19,6 +19,33 @@ export default function RegistrationPage() {
           description={conference.registration.description}
           align="center"
         />
+
+        <div className="mt-10 grid gap-6 sm:grid-cols-2">
+          {[pricing.earlyBird, pricing.regular].map((tier) => (
+            <div
+              key={tier.label}
+              className="rounded-2xl border border-border bg-surface-muted p-6"
+            >
+              <h3 className="text-sm font-semibold uppercase tracking-wider text-brand">
+                {tier.label}
+              </h3>
+              <dl className="mt-4 space-y-2 text-sm">
+                <div className="flex items-center justify-between">
+                  <dt className="text-muted">Single</dt>
+                  <dd className="font-semibold">{tier.single}</dd>
+                </div>
+                <div className="flex items-center justify-between">
+                  <dt className="text-muted">Double</dt>
+                  <dd className="font-semibold">{tier.double}</dd>
+                </div>
+                <div className="flex items-center justify-between">
+                  <dt className="text-muted">Family of 4</dt>
+                  <dd className="font-semibold">{tier.family}</dd>
+                </div>
+              </dl>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Formester script loaded once, after the page becomes interactive */}
@@ -29,7 +56,10 @@ export default function RegistrationPage() {
       />
 
       <div className="mx-auto mt-12 w-full max-w-4xl px-4 sm:px-6">
-        <FormesterForm />
+        <FormesterForm
+          formId="8Cci8mm9c"
+          url="https://aihrkgqy.formester.com/f/8Cci8mm9c"
+        />
       </div>
     </div>
   );

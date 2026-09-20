@@ -17,7 +17,13 @@ function findIframe(host: Element | null): HTMLIFrameElement | null {
   );
 }
 
-export default function FormesterForm() {
+export default function FormesterForm({
+  formId,
+  url,
+}: {
+  formId: string;
+  url: string;
+}) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const [cover, setCover] = useState({ left: 0, bottom: 0 });
 
@@ -105,8 +111,8 @@ export default function FormesterForm() {
         set-auto-height="true"
         height="100%"
         width="100%"
-        id="8Cci8mm9c"
-        url="https://aihrkgqy.formester.com/f/8Cci8mm9c"
+        id={formId}
+        url={url}
         className="block w-full"
       ></formester-standard-form>
       <div
