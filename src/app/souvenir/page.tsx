@@ -50,6 +50,20 @@ export default function SouvenirPage() {
             Check registration updates →
           </Link>
         </div>
+
+        <div className="mt-6 rounded-2xl border border-border bg-surface p-8 text-center shadow-sm">
+          <h3 className="text-lg font-semibold">Have a photo or memory to share?</h3>
+          <p className="mt-2 text-sm text-muted">
+            The souvenir review board is collecting family photos and stories for the
+            conference booklet.
+          </p>
+          <Link
+            href="/souvenir/submit/"
+            className="mt-4 inline-flex text-sm font-semibold text-brand hover:underline"
+          >
+            Submit to the souvenir →
+          </Link>
+        </div>
       </div>
     </div>
   );

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import SectionHeading from "@/components/SectionHeading";
-import { aboutSections, conference } from "@/lib/site-content";
+import { aboutSections, conference, speakers, theme } from "@/lib/site-content";
 
 export const metadata: Metadata = {
   title: "About",
@@ -70,6 +70,34 @@ export default function AboutPage() {
             >
               Have questions? Contact us →
             </Link>
+          </div>
+        </div>
+
+        <div className="mt-16 rounded-2xl border border-border bg-surface-muted p-8 text-center sm:p-12">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand">
+            Conference Theme
+          </p>
+          <h2 className="mt-3 font-[family-name:var(--font-display)] text-2xl font-semibold tracking-tight sm:text-3xl">
+            {theme.title}
+          </h2>
+          <p className="mt-2 text-lg text-muted">{theme.malayalam}</p>
+          <p className="mt-3 text-sm font-medium text-brand">{theme.verse}</p>
+        </div>
+
+        <div className="mt-16">
+          <SectionHeading eyebrow="Guests" title="Chief Guest & Main Speaker" />
+          <div className="mt-10 grid gap-6 sm:grid-cols-2">
+            {speakers.map((speaker) => (
+              <article
+                key={speaker.name}
+                className="rounded-2xl border border-border bg-surface p-6 shadow-sm"
+              >
+                <p className="text-xs font-semibold uppercase tracking-wider text-brand">
+                  {speaker.role}
+                </p>
+                <h3 className="mt-2 text-lg font-semibold">{speaker.name}</h3>
+              </article>
+            ))}
           </div>
         </div>
 

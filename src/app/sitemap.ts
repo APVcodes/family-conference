@@ -10,6 +10,7 @@ const paths = [
   "/leaders/",
   "/registration/",
   "/souvenir/",
+  "/souvenir/submit/",
   "/contact/",
 ] as const;
 
