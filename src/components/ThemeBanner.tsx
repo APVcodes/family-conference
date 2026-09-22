@@ -7,7 +7,7 @@ export default function ThemeBanner() {
 
   return (
     <div className="overflow-hidden bg-brand-dark text-white">
-      <div className="flex w-max animate-[marquee_38s_linear_infinite] py-2.5 motion-reduce:animate-none">
+      <div className="flex w-max animate-[marquee_38s_linear_infinite] py-2.5 will-change-transform [transform:translateZ(0)] motion-reduce:animate-none">
         {track.map((text, i) => (
           <span
             key={i}
