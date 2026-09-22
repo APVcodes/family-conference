@@ -1,9 +1,9 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { conference } from "@/lib/site-content";
 import { navLinks } from "@/lib/navigation";
 
 function NavLink({
@@ -49,15 +49,17 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-surface/95 backdrop-blur-md">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6">
-        <Link href="/" className="flex items-center gap-3" onClick={() => setMenuOpen(false)}>
-          <Image
-            src="/images/family-conference-sample-logo.jpg"
-            alt="Mar Thoma Diocese of North America"
-            width={140}
-            height={40}
-            className="h-8 w-auto sm:h-9"
-            priority
-          />
+        <Link
+          href="/"
+          className="flex flex-col leading-tight"
+          onClick={() => setMenuOpen(false)}
+        >
+          <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-brand sm:text-xs">
+            Mar Thoma North American
+          </span>
+          <span className="font-[family-name:var(--font-display)] text-lg font-semibold tracking-tight text-foreground sm:text-xl">
+            {conference.shortTitle}
+          </span>
         </Link>
 
         <nav className="hidden items-center gap-1 md:flex">
