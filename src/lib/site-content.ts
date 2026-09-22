@@ -150,21 +150,8 @@ export const promoVideos = [
   },
 ];
 
-export const souvenirSubmission = {
-  eyebrow: "Souvenir Committee",
-  title: "Submit your memory for the souvenir.",
-  description:
-    "Share photos and a short write-up for the 36th Family Conference souvenir booklet. Submissions are reviewed by the souvenir review board before anything is included.",
-  guidelines: [
-    "Upload 2–3 images (JPG or PNG).",
-    "Write between 1,000 and 1,500 characters describing your memory, family, or parish.",
-    "Submissions are for review only — approval does not guarantee inclusion in the final booklet.",
-  ],
-  // Fill these in after creating the form in the Formester dashboard.
-  // See docs/souvenir-review-setup.md.
-  formesterId: "REPLACE_WITH_FORMESTER_FORM_ID",
-  formesterUrl: "REPLACE_WITH_FORMESTER_FORM_URL",
-};
+// TODO: replace with the Google Doc link for souvenir submissions once available.
+export const souvenirSubmissionUrl = "#";
 
 export const souvenirs = [
   {
