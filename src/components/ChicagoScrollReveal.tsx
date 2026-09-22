@@ -26,7 +26,8 @@ export default function ChicagoScrollReveal() {
     const update = () => {
       frame = 0;
       const rect = section.getBoundingClientRect();
-      const total = section.offsetHeight - window.innerHeight;
+      const viewport = window.visualViewport?.height ?? window.innerHeight;
+      const total = section.offsetHeight - viewport;
       if (total <= 0) {
         setProgress(0);
         return;
@@ -42,9 +43,11 @@ export default function ChicagoScrollReveal() {
     update();
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", onScroll);
+    window.visualViewport?.addEventListener("resize", onScroll);
     return () => {
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onScroll);
+      window.visualViewport?.removeEventListener("resize", onScroll);
       if (frame) window.cancelAnimationFrame(frame);
     };
   }, []);
@@ -64,7 +67,7 @@ export default function ChicagoScrollReveal() {
       className="relative h-[260vh] bg-brand-dark"
       aria-label="Chicago conference introduction"
     >
-      <div className="sticky top-0 flex h-screen items-center justify-center overflow-hidden">
+      <div className="sticky top-0 flex h-[100svh] items-center justify-center overflow-hidden">
         <div
           className="absolute inset-0 will-change-transform"
           style={{
@@ -76,7 +79,7 @@ export default function ChicagoScrollReveal() {
           aria-hidden="true"
         />
         <div
-          className="absolute inset-0 bg-brand-dark transition-opacity duration-300"
+          className="absolute inset-0 bg-brand-dark"
           style={{ opacity: overlay }}
           aria-hidden="true"
         />
@@ -91,7 +94,6 @@ export default function ChicagoScrollReveal() {
             style={{
               opacity: titleOpacity,
               transform: `translateY(${titleY}px)`,
-              transition: "opacity 0.05s linear, transform 0.05s linear",
             }}
           >
             North American Mar Thoma

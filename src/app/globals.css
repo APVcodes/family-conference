@@ -48,3 +48,10 @@ html {
     transform: translateX(-50%);
   }
 }
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-\[marquee_38s_linear_infinite\] {
+    animation: none !important;
+  }
+}
+
