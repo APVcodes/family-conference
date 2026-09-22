@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import SectionHeading from "@/components/SectionHeading";
-import { souvenirs } from "@/lib/site-content";
+import { souvenirSubmissionUrl, souvenirs } from "@/lib/site-content";
 
 export const metadata: Metadata = {
   title: "Souvenir",
@@ -58,7 +58,7 @@ export default function SouvenirPage() {
             conference booklet.
           </p>
           <Link
-            href="/souvenir/submit/"
+            href={souvenirSubmissionUrl}
             className="mt-4 inline-flex text-sm font-semibold text-brand hover:underline"
           >
             Submit to the souvenir →

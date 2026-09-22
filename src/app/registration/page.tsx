@@ -56,10 +56,7 @@ export default function RegistrationPage() {
       />
 
       <div className="mx-auto mt-12 w-full max-w-4xl px-4 sm:px-6">
-        <FormesterForm
-          formId="8Cci8mm9c"
-          url="https://aihrkgqy.formester.com/f/8Cci8mm9c"
-        />
+        <FormesterForm />
       </div>
     </div>
   );
