@@ -1,7 +1,7 @@
 export const conference = {
   title: "Mar Thoma North America Diocese 36th Family Conference 2027",
   shortTitle: "36th Family Conference 2027",
-  tagline: "Gather in faith. Grow in fellowship.",
+  tagline: "Rooted in Christ, Routed through the Family",
   subtitle:
     "A welcoming gathering for Mar Thoma families across North America. Conference dates, venue, registration, and program details will be announced here.",
   organization: "Mar Thoma Church · Diocese of North America",

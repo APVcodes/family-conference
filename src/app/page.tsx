@@ -4,19 +4,30 @@ import AgendaPreview from "@/components/AgendaPreview";
 import ChicagoScrollReveal from "@/components/ChicagoScrollReveal";
 import HeroVideo from "@/components/HeroVideo";
 import SectionHeading from "@/components/SectionHeading";
+import ThemeBanner from "@/components/ThemeBanner";
 import VideoReels from "@/components/VideoReels";
 import { aboutSections, conference, sampleAgendas } from "@/lib/site-content";
 
 export default function HomePage() {
   return (
     <>
+      <ThemeBanner />
+
       <section className="relative overflow-hidden bg-neutral-900 text-white">
         <HeroVideo />
         <div className="absolute inset-0 bg-black/45" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(209, 208, 208, 0.15),transparent_50%)]" />
         <div className="relative mx-auto grid max-w-6xl items-center gap-10 px-4 py-16 sm:px-6 sm:py-20 lg:grid-cols-[1.15fr_0.85fr] lg:gap-12 lg:py-24">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.25em] text-accent-light">
+            <Image
+              src="/images/Marthoma_logo.png"
+              alt="Mar Thoma Church emblem"
+              width={180}
+              height={180}
+              className="h-20 w-auto sm:h-24"
+              priority
+            />
+            <p className="mt-4 text-xs font-semibold uppercase tracking-[0.25em] text-accent-light">
               {conference.organization}
             </p>
             <p className="mt-3 text-sm font-medium uppercase tracking-widest text-white/70">
