@@ -56,6 +56,7 @@ export type PricingTier = {
 export const pricing: { earlyBird: PricingTier; regular: PricingTier } = {
   earlyBird: {
     label: "Early Bird Pricing",
+    note: "Ends January 31, 2027",
     single: "$899",
     double: "$1,499",
     family: "$1,999",
