@@ -47,6 +47,7 @@ export const speakers = [
 
 export type PricingTier = {
   label: string;
+  note?: string;
   single: string;
   double: string;
   family: string;
@@ -61,6 +62,7 @@ export const pricing: { earlyBird: PricingTier; regular: PricingTier } = {
   },
   regular: {
     label: "Regular Pricing",
+    note: "Starts February 1, 2027",
     single: "$950",
     double: "$1,600",
     family: "$2,200",

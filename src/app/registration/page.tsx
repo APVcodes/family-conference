@@ -29,6 +29,9 @@ export default function RegistrationPage() {
               <h3 className="text-sm font-semibold uppercase tracking-wider text-brand">
                 {tier.label}
               </h3>
+              {tier.note && (
+                <p className="mt-1 text-sm text-muted">{tier.note}</p>
+              )}
               <dl className="mt-4 space-y-2 text-sm">
                 <div className="flex items-center justify-between">
                   <dt className="text-muted">Single</dt>
