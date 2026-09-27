@@ -33,6 +33,12 @@ export default function ContactPage() {
               </svg>
               {conference.contactEmail}
             </a>
+            <a
+              href={`tel:${conference.contactPhone.replace(/[^\d+]/g, "")}`}
+              className="mt-3 inline-flex items-center gap-2 text-brand font-semibold hover:underline"
+            >
+              {conference.contactPhone}
+            </a>
           </div>
 
           <div className="rounded-2xl border border-border bg-surface-muted p-8">

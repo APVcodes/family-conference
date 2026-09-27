@@ -18,6 +18,7 @@ export const conference = {
     cta: "Register Now",
   },
   contactEmail: "marthomadiocese@gmail.com",
+  contactPhone: "516-377-3311",
   councilUrl: "https://marthomana.org/council-members/",
 };
 
@@ -44,31 +45,6 @@ export const speakers = [
     role: "Main Speaker",
   },
 ];
-
-export type PricingTier = {
-  label: string;
-  note?: string;
-  single: string;
-  double: string;
-  family: string;
-};
-
-export const pricing: { earlyBird: PricingTier; regular: PricingTier } = {
-  earlyBird: {
-    label: "Early Bird Pricing",
-    note: "Ends January 31, 2027",
-    single: "$899",
-    double: "$1,499",
-    family: "$1,999",
-  },
-  regular: {
-    label: "Regular Pricing",
-    note: "Starts February 1, 2027",
-    single: "$950",
-    double: "$1,600",
-    family: "$2,200",
-  },
-};
 
 export type AgendaDay = {
   dayLabel: string;
