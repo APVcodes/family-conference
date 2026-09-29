@@ -20,7 +20,7 @@ type Summary = {
   dueLabel?: string;
   paymentMethod?: string;
   processingFee?: number;
-  participants: { name: string; categoryLabel: string }[];
+  participants: { name: string; categoryLabel: string; allergies?: string }[];
 };
 
 export default function RegistrationPaymentResult() {
@@ -148,6 +148,7 @@ export default function RegistrationPaymentResult() {
           {summary.participants.map((person) => (
             <li key={`${person.name}-${person.categoryLabel}`}>
               {person.name} — {person.categoryLabel}
+              {person.allergies ? ` · Allergies: ${person.allergies}` : ""}
             </li>
           ))}
         </ul>

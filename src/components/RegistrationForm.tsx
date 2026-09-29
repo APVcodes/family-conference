@@ -27,6 +27,8 @@ type Participant = {
   id: string;
   name: string;
   category: AgeCategory | "";
+  hasAllergy: "yes" | "no" | "";
+  allergies: string;
 };
 
 const billingLabels: Record<BillingRole, string> = {
@@ -45,7 +47,7 @@ const inputClass =
   "mt-1.5 w-full rounded-xl border border-border bg-white px-3 py-2.5 text-sm text-foreground outline-none transition-colors focus:border-brand";
 
 function newParticipant(): Participant {
-  return { id: crypto.randomUUID(), name: "", category: "" };
+  return { id: crypto.randomUUID(), name: "", category: "", hasAllergy: "", allergies: "" };
 }
 
 function digits(value: string) {
@@ -137,6 +139,14 @@ export default function RegistrationForm() {
       setError("Add a name and age group for each participant.");
       return;
     }
+    if (participants.some((person) => !person.hasAllergy)) {
+      setError("Tell us whether each participant has allergies.");
+      return;
+    }
+    if (participants.some((person) => person.hasAllergy === "yes" && !person.allergies.trim())) {
+      setError("List the allergies for each participant who has them.");
+      return;
+    }
     if (quote.occupancy < 1) {
       setError("Include at least one participant age 6 or older. Children ages 1–5 are free and do not set the room rate.");
       return;
@@ -181,6 +191,8 @@ export default function RegistrationForm() {
         categoryLabel: ageCategoryById(category).label,
         billing,
         billingLabel: billingLabels[billing],
+        hasAllergy: person.hasAllergy === "yes" ? "Yes" : "No",
+        allergies: person.hasAllergy === "yes" ? person.allergies.trim() : "",
       };
     });
 
@@ -330,6 +342,40 @@ export default function RegistrationForm() {
               >
                 Remove
               </button>
+              <fieldset className="sm:col-span-3">
+                <legend className="text-sm font-medium">Any allergies?</legend>
+                <div className="mt-2 flex gap-6 text-sm font-normal">
+                  {(["yes", "no"] as const).map((value) => (
+                    <label key={value} className="inline-flex items-center gap-2">
+                      <input
+                        type="radio"
+                        name={`allergy-${person.id}`}
+                        checked={person.hasAllergy === value}
+                        onChange={() =>
+                          updateParticipant(person.id, {
+                            hasAllergy: value,
+                            allergies: value === "no" ? "" : person.allergies,
+                          })
+                        }
+                        required
+                      />
+                      {value === "yes" ? "Yes" : "No"}
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
+              {person.hasAllergy === "yes" && (
+                <label className="block text-sm font-medium sm:col-span-3">
+                  Allergies
+                  <textarea
+                    className={`${inputClass} min-h-20`}
+                    value={person.allergies}
+                    onChange={(event) => updateParticipant(person.id, { allergies: event.target.value })}
+                    placeholder="List each allergy"
+                    required
+                  />
+                </label>
+              )}
               {person.category && quote.lines[index] && (
                 <p className="text-xs font-medium text-brand sm:col-span-3">
                   {billingLabels[quote.lines[index].billing]}

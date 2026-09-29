@@ -72,6 +72,7 @@ var PARTICIPANT_HEADERS = [
   "Name",
   "Age group",
   "Billing",
+  "Allergies",
 ];
 
 function doPost(e) {
@@ -104,7 +105,16 @@ function appendRegistration_(submittedAt, registrationId, data, quote, participa
   var sheet = getSheet_("Registrations", REGISTRATION_HEADERS);
   var summary = participants
     .map(function (person) {
-      return person.name + " (" + person.categoryLabel + ", " + person.billingLabel + ")";
+      return (
+        person.name +
+        " (" +
+        person.categoryLabel +
+        ", " +
+        person.billingLabel +
+        ", allergies: " +
+        (person.allergies || "none") +
+        ")"
+      );
     })
     .join("; ");
 
@@ -155,6 +165,7 @@ function appendParticipants_(submittedAt, registrationId, participants) {
       person.name || "",
       person.categoryLabel || "",
       person.billingLabel || "",
+      person.allergies || "None",
     ]);
   });
 }
@@ -187,7 +198,16 @@ function getSheet_(name, headers) {
 function sendConfirmation_(registrationId, data, quote, participants) {
   var participantLines = participants
     .map(function (person) {
-      return "- " + person.name + " — " + person.categoryLabel + " (" + person.billingLabel + ")";
+      return (
+        "- " +
+        person.name +
+        " — " +
+        person.categoryLabel +
+        " (" +
+        person.billingLabel +
+        ")\n  Allergies: " +
+        (person.allergies || "none")
+      );
     })
     .join("\n");
 
@@ -378,10 +398,18 @@ function normalizeRegistration_(data) {
     if (!person.name || !CATEGORY_LABELS[category]) {
       throw new Error("Each participant needs a name and age group.");
     }
+    if (person.hasAllergy !== "Yes" && person.hasAllergy !== "No") {
+      throw new Error("Tell us whether each participant has allergies.");
+    }
+    var allergies = person.hasAllergy === "Yes" ? String(person.allergies || "").trim() : "";
+    if (person.hasAllergy === "Yes" && !allergies) {
+      throw new Error("List the allergies for each participant who has them.");
+    }
     return {
       name: String(person.name).trim(),
       category: category,
       categoryLabel: CATEGORY_LABELS[category],
+      allergies: allergies,
     };
   });
   if (!data.firstName || !data.lastName) throw new Error("Enter the registrant’s name.");
