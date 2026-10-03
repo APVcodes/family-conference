@@ -3,7 +3,7 @@ export const conference = {
   shortTitle: "36th Family Conference 2027",
   tagline: "Rooted in Christ, Routed through the Family",
   subtitle:
-    "A welcoming gathering for Mar Thoma families across North America. Conference dates, venue, registration, and program details will be announced here.",
+    "A welcoming gathering for Mar Thoma families across North America.",
   organization: "Mar Thoma Diocese of North America",
   host: "Hosted by MidWest Regional Activities Committee",
   dates: "July 1–4, 2027",
@@ -123,7 +123,7 @@ export const aboutSections = [
   {
     title: "Stay together",
     description:
-      "Accommodation options and room guidance will be shared once the venue is confirmed.",
+      "Rooms at the Double Tree by Hilton are included with registration. The room size follows the people in your group.",
   },
   {
     title: "Children & youth",
