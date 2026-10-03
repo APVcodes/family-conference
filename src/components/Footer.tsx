@@ -46,6 +46,7 @@ export default function Footer() {
             >
               {conference.contactEmail}
             </a>
+            <p className="mt-4 text-sm text-white/70">{conference.host}</p>
           </div>
         </div>
 

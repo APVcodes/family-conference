@@ -96,7 +96,7 @@ export default function ChicagoScrollReveal() {
               transform: `translateY(${titleY}px)`,
             }}
           >
-            North American Mar Thoma
+            Mar Thoma Diocese of North America
             <span className="block text-accent-light">Family Conference 2027</span>
           </p>
 

@@ -55,7 +55,7 @@ export default function Header() {
           onClick={() => setMenuOpen(false)}
         >
           <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-brand sm:text-xs">
-            Mar Thoma North American
+            Mar Thoma Diocese of North America
           </span>
           <span className="font-[family-name:var(--font-display)] text-lg font-semibold tracking-tight text-foreground sm:text-xl">
             {conference.shortTitle}

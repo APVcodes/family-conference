@@ -208,6 +208,7 @@ export function quoteRegistration(categories: (AgeCategory | "")[], tier: Pricin
 
   const occupancy = ranked.length;
   const selected = occupancy === 0 ? null : packageById(packageByOccupancy[Math.min(occupancy, 4) - 1]);
+  const room = partySize === 0 ? null : packageById(packageByOccupancy[Math.min(partySize, 4) - 1]);
   const includedIndexes = new Set(
     ranked.slice(0, selected?.included ?? 0).map((person) => person.index),
   );
@@ -232,6 +233,7 @@ export function quoteRegistration(categories: (AgeCategory | "")[], tier: Pricin
     tier,
     packageId: selected?.id ?? null,
     packageLabel: selected?.label ?? "",
+    roomLabel: room?.label ?? "",
     occupancy,
     partySize,
     included: selected?.included ?? 0,

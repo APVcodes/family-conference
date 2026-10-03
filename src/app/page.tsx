@@ -172,8 +172,7 @@ export default function HomePage() {
             Ready to join us in 2027?
           </h2>
           <p className="mx-auto mt-3 max-w-xl text-white/80">
-            Registration details are on the way. Sign up for updates and explore the conference
-            program as it is announced.
+            Registration is now open.
           </p>
           <Link
             href="/registration/"

@@ -25,9 +25,9 @@
  * Redeploy as a new version after every script change.
  */
 
-var CONFERENCE_EMAIL = "marthomadiocese@gmail.com";
+var CONFERENCE_EMAIL = "infomarthomanafc27@gmail.com";
 var CONFERENCE_PHONE = "516-377-3311";
-var NOTIFY_EMAIL = "marthomadiocese@gmail.com";
+var NOTIFY_EMAIL = "infomarthomanafc27@gmail.com";
 
 var REGISTRATION_HEADERS = [
   "Submitted at",
@@ -64,6 +64,7 @@ var REGISTRATION_HEADERS = [
   "Balance due",
   "Payment method",
   "Processing fee",
+  "Room needed",
 ];
 
 var PARTICIPANT_HEADERS = [
@@ -153,6 +154,7 @@ function appendRegistration_(submittedAt, registrationId, data, quote, participa
     data.payment ? data.payment.dueLabel : "",
     data.payment ? data.payment.methodLabel || "" : "",
     data.payment && data.payment.feeCents ? data.payment.feeCents / 100 : 0,
+    quote.roomLabel || "",
   ]);
 }
 
@@ -218,11 +220,12 @@ function sendConfirmation_(registrationId, data, quote, participants) {
   var text = [
     "Hello " + data.firstName + ",",
     "",
-    "We received your registration for the Mar Thoma North America Diocese 36th Family Conference 2027. This confirmation was sent to the primary registrant at " + data.email + ".",
+    "We received your registration for the Mar Thoma Diocese of North America 36th Family Conference 2027. This confirmation was sent to the primary registrant at " + data.email + ".",
     "",
     "Registration ID: " + registrationId,
     "Pricing: " + (quote.tierLabel || ""),
-    "Package: " + (quote.packageLabel || "") + " — " + money(quote.packagePrice),
+    "Package charged: " + (quote.packageLabel || "") + " — " + money(quote.packagePrice),
+    "Room needed: " + (quote.roomLabel || ""),
     "Extra adults: " + (quote.extraAdults || 0) + " × " + money(quote.extraAdultRate),
     "Extra children (ages 6–12): " + (quote.extraChildren || 0) + " × " + money(quote.extraChildRate),
     "Children ages 1–5 (free): " + (quote.freeChildren || 0),
@@ -380,6 +383,7 @@ function confirmPayment_(sessionId) {
       parish: registration.parish,
       region: registration.region,
       packageLabel: registration.quote.packageLabel,
+      roomLabel: registration.quote.roomLabel || "",
       total: registration.quote.total,
       paymentPlan: registration.payment.planLabel,
       charged: registration.payment.chargeCents / 100,
@@ -638,14 +642,17 @@ function priceRegistration_(categories) {
   var extraChildren = lines.filter(function (line) { return line.billing === "extra-child"; }).length;
   var freeChildren = lines.filter(function (line) { return line.billing === "free"; }).length;
   var packagePrice = selected ? selected[tier] : 0;
+  var partySize = categories.length;
+  var room = partySize ? packages[Math.min(partySize, 4) - 1] : null;
   return {
     tier: tier,
     tierLabel: tier === "earlyBird" ? "Early bird (through January 31, 2027)" : "Regular (from February 1, 2027)",
     packageId: selected ? selected.id : "",
     packageLabel: selected ? selected.label : "",
+    roomLabel: room ? room.label : "",
     packagePrice: packagePrice,
     occupancy: ranked.length,
-    partySize: categories.length,
+    partySize: partySize,
     extraAdults: extraAdults,
     extraAdultRate: extraAdultRate,
     extraChildren: extraChildren,

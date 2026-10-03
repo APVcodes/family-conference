@@ -35,10 +35,11 @@ export default function RegistrationExperience() {
           <h2 className="text-lg font-semibold">Package rates</h2>
           <p className="mt-2 text-sm leading-relaxed text-muted">
             Early bird pricing ends January 31, 2027. Regular pricing starts February 1, 2027. The room rate
-            follows how many people count toward occupancy. Children ages 1–5 are free and are not counted, so
-            three people plus a child under 5 is priced as a family of 3. Anyone past four people in the room
-            rate is added at the extra adult or child rate. A group of more than four people is noted for the
-            registration team because extra room space is needed.
+            follows how many people count toward the price. Children ages 1–5 are free and are not counted, so
+            three adults plus a child under 5 are charged the family of 3 rate. The room booked still fits
+            everyone in the group, so that same registration needs a family of 4 room. Anyone past four people
+            in the priced rate is added at the extra adult or child rate. A group of more than four people is
+            noted for the registration team because extra room space is needed.
           </p>
           <div className="mt-4 overflow-x-auto rounded-2xl border border-border">
             <table className="w-full min-w-[36rem] text-left text-sm">

@@ -1,10 +1,11 @@
 export const conference = {
-  title: "Mar Thoma North America Diocese 36th Family Conference 2027",
+  title: "Mar Thoma Diocese of North America 36th Family Conference 2027",
   shortTitle: "36th Family Conference 2027",
   tagline: "Rooted in Christ, Routed through the Family",
   subtitle:
     "A welcoming gathering for Mar Thoma families across North America. Conference dates, venue, registration, and program details will be announced here.",
-  organization: "Mar Thoma Church · Diocese of North America",
+  organization: "Mar Thoma Diocese of North America",
+  host: "Hosted by MidWest Regional Activities Committee",
   dates: "July 1–4, 2027",
   venue: {
     name: "Double Tree by Hilton",
@@ -14,10 +15,10 @@ export const conference = {
   registration: {
     headline: "Registration",
     description:
-      "Mar Thoma North America 36th Family Conference 2027",
+      "Mar Thoma Diocese of North America 36th Family Conference 2027",
     cta: "Register Now",
   },
-  contactEmail: "marthomadiocese@gmail.com",
+  contactEmail: "infomarthomanafc27@gmail.com",
   contactPhone: "516-377-3311",
   councilUrl: "https://marthomana.org/council-members/",
 };
@@ -31,18 +32,29 @@ export const theme = {
 export const bishop = {
   name: "Rt. Rev. Dr. Abraham Mar Paulos Episcopa",
   title: "Diocesan Bishop",
-  organization: "Diocese of North America · Mar Thoma Church",
+  organization: "Mar Thoma Diocese of North America",
   image: "/images/DrAbrahamMarPaulos.webp",
 };
+
+export const committee = [
+  { name: "Rev. Jaisen A. Thomas", role: "Vice President", phone: "832-841-0322" },
+  { name: "Mr. Jacob George", role: "General Convenor", phone: "630-440-9985" },
+  { name: "Dr. Joe M. George", role: "Co-Convenor", phone: "224-381-2174" },
+  { name: "Mr. Alan John", role: "Co-Convenor", phone: "313-999-3365" },
+  { name: "Mr. Vinod Thomas", role: "Treasurer", phone: "586-770-1294" },
+  { name: "Dr. Shijy Alex", role: "Accountant", phone: "224-436-9371" },
+];
 
 export const speakers = [
   {
     name: "Rt. Rev. PD Dr. Joseph Mar Ivanios Episcopa",
     role: "Chief Guest",
+    office: "Diocesan Bishop, UK-Europe-Africa Dioceses and Mumbai Diocese",
   },
   {
-    name: "Rev. K E Geevarghese",
+    name: "Rev. K.E. Geevarghese",
     role: "Main Speaker",
+    office: "Secretary to the Mar Thoma Metropolitan",
   },
 ];
 
@@ -56,11 +68,22 @@ export type AgendaDay = {
 export const sampleAgendas: AgendaDay[] = [
   {
     dayLabel: "Day 1 - Agenda",
+    date: "Thursday, July 1",
+    note: "A preview of one conference day. Full schedule coming soon.",
+    items: [
+      { time: "3:00 PM", title: "Arrival & Check-in", detail: "Venue lobby" },
+      { time: "5:00 PM", title: "Opening Worship", detail: "Main hall" },
+      { time: "7:00 PM", title: "Welcome Dinner", detail: "Dining hall" },
+      { time: "8:30 PM", title: "Fellowship", detail: "Main hall" },
+    ],
+  },
+  {
+    dayLabel: "Day 2 - Agenda",
     date: "Friday, July 2",
     note: "A preview of one conference day. Full schedule coming soon.",
     items: [
       { time: "7:30 AM", title: "Morning Prayer", detail: "Chapel" },
-      { time: "9:00 AM", title: "Opening Worship", detail: "Main hall" },
+      { time: "9:00 AM", title: "Worship", detail: "Main hall" },
       { time: "10:30 AM", title: "Bible Study", detail: "Adults, youth & children" },
       { time: "12:30 PM", title: "Family Lunch", detail: "Dining hall" },
       { time: "2:00 PM", title: "Workshops & Fellowship", detail: "Breakout sessions" },
@@ -69,7 +92,7 @@ export const sampleAgendas: AgendaDay[] = [
     ],
   },
   {
-    dayLabel: "Day 2 - Agenda",
+    dayLabel: "Day 3 - Agenda",
     date: "Saturday, July 3",
     note: "A preview of one conference day. Full schedule coming soon.",
     items: [
@@ -83,7 +106,7 @@ export const sampleAgendas: AgendaDay[] = [
     ],
   },
   {
-    dayLabel: "Day 3 - Agenda",
+    dayLabel: "Day 4 - Agenda",
     date: "Sunday, July 4",
     note: "A preview of one conference day. Full schedule coming soon.",
     items: [

@@ -9,7 +9,7 @@ import { conference } from "@/lib/site-content";
 export const metadata: Metadata = {
   title: "Chicago",
   description:
-    "Explore Chicago landmarks and food spots with map directions for the Mar Thoma North America 36th Family Conference 2027.",
+    "Explore Chicago landmarks and food spots with map directions for the Mar Thoma Diocese of North America 36th Family Conference 2027.",
 };
 
 const highlights = [

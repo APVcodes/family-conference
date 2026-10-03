@@ -298,9 +298,10 @@ export default function RegistrationForm() {
       <section className="rounded-2xl border border-border bg-surface p-6 shadow-sm sm:p-8">
         <h3 className="text-lg font-semibold">Participants</h3>
         <p className="mt-2 text-sm leading-relaxed text-muted">
-          List everyone in this registration, including yourself. The room rate is chosen from this list.
-          Children ages 1–5 are free and are not counted, so three people plus a child under 5 is priced as
-          a family of 3. Young Adult is ages 13–35, Adult is ages 36–59, and Senior is ages 60 and older.
+          List everyone in this registration, including yourself. The price is chosen from this list.
+          Children ages 1–5 are free and are not counted, so three adults plus a child under 5 are charged
+          as a family of 3, while the room booked is for all four people. Young Adult is ages 13–35, Adult
+          is ages 36–59, and Senior is ages 60 and older.
           Those three groups use the adult rate. Ages 6–12 use the child rate when the group is larger than
           the room rate.
         </p>
@@ -308,7 +309,7 @@ export default function RegistrationForm() {
           {participants.map((person, index) => (
             <div key={person.id} className="grid gap-4 rounded-xl border border-border p-4 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
               <label className="block text-sm font-medium">
-                Name
+                Full name
                 <input
                   className={inputClass}
                   value={person.name}
@@ -376,11 +377,13 @@ export default function RegistrationForm() {
                   />
                 </label>
               )}
-              {person.category && quote.lines[index] && (
-                <p className="text-xs font-medium text-brand sm:col-span-3">
-                  {billingLabels[quote.lines[index].billing]}
-                </p>
-              )}
+              {person.category &&
+                quote.lines[index] &&
+                quote.lines[index].billing !== "included" && (
+                  <p className="text-xs font-medium text-brand sm:col-span-3">
+                    {billingLabels[quote.lines[index].billing]}
+                  </p>
+                )}
             </div>
           ))}
         </div>
@@ -451,8 +454,8 @@ export default function RegistrationForm() {
         <h3 className="text-lg font-semibold">Emergency contact</h3>
         <div className="mt-5 grid gap-4 sm:grid-cols-2">
           <label className="block text-sm font-medium">
-            Name
-            <input className={inputClass} value={emergencyName} onChange={(event) => setEmergencyName(event.target.value)} required />
+            Full name
+            <input className={inputClass} value={emergencyName} onChange={(event) => setEmergencyName(event.target.value)} autoComplete="name" required />
           </label>
           <label className="block text-sm font-medium">
             Phone
@@ -465,6 +468,12 @@ export default function RegistrationForm() {
         <h3 className="text-lg font-semibold">Estimated total</h3>
         <p className="mt-1 text-sm text-muted">{tierLabels[tier]}</p>
         <dl className="mt-4 space-y-2 text-sm">
+          {quote.roomLabel && (
+            <div className="flex justify-between gap-4">
+              <dt>Room needed</dt>
+              <dd className="font-semibold">{quote.roomLabel}</dd>
+            </div>
+          )}
           <div className="flex justify-between gap-4">
             <dt>{quote.packageLabel || "Room rate"}</dt>
             <dd className="font-semibold">
@@ -508,7 +517,7 @@ export default function RegistrationForm() {
         </dl>
         <p className="mt-4 text-xs leading-relaxed text-muted">
           {quote.occupancy > 0
-            ? `Children ages 1–5 (${quote.freeChildren}) are free and are not counted. ${quote.occupancy} ${quote.occupancy === 1 ? "person counts" : "people count"} toward the room rate.`
+            ? `Children ages 1–5 (${quote.freeChildren}) are free and are not counted in the price. ${quote.occupancy} ${quote.occupancy === 1 ? "person counts" : "people count"} toward the rate. The room needed fits all ${quote.partySize} ${quote.partySize === 1 ? "person" : "people"}.`
             : "Children ages 1–5 are free and are not counted. Add someone age 6 or older to set the room rate."}
         </p>
         {quote.needsExtraRoom && (
@@ -599,8 +608,8 @@ export default function RegistrationForm() {
       <section className="rounded-2xl border border-border bg-surface p-6 text-sm leading-relaxed text-muted shadow-sm sm:p-8">
         <h3 className="text-lg font-semibold text-foreground">Payment disclaimer</h3>
         <p className="mt-3">
-          Payment is processed by Stripe. You enter payment details on Stripe’s secure page. The Diocese does
-          not see or store your card or bank account. The amount due includes Stripe’s processing fee for the
+          Payment is processed by Stripe. You enter payment details on Stripe’s secure page. The Mar Thoma
+          Diocese of North America does not see or store your card or bank account. The amount due includes Stripe’s processing fee for the
           method you choose. Stripe’s own terms and privacy policy apply. After payment, a confirmation email
           with your registration details is sent to the primary registrant. Stripe also emails a payment receipt.
         </p>

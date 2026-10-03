@@ -13,6 +13,7 @@ type Summary = {
   parish: string;
   region: string;
   packageLabel: string;
+  roomLabel?: string;
   total: number;
   paymentPlan?: string;
   charged?: number;
@@ -116,6 +117,12 @@ export default function RegistrationPaymentResult() {
             <dt className="text-muted">Package</dt>
             <dd className="text-right font-medium">{summary.packageLabel}</dd>
           </div>
+          {summary.roomLabel && (
+            <div className="flex justify-between gap-4">
+              <dt className="text-muted">Room needed</dt>
+              <dd className="text-right font-medium">{summary.roomLabel}</dd>
+            </div>
+          )}
           {summary.paymentPlan && (
             <div className="flex justify-between gap-4">
               <dt className="text-muted">Payment plan</dt>

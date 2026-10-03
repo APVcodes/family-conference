@@ -1,13 +1,12 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import Link from "next/link";
 import SectionHeading from "@/components/SectionHeading";
-import { bishop, conference } from "@/lib/site-content";
+import { bishop, committee, conference, speakers } from "@/lib/site-content";
 
 export const metadata: Metadata = {
   title: "Leaders",
   description:
-    "Meet the diocesan leadership guiding the Mar Thoma North America 36th Family Conference 2027.",
+    "Meet the diocesan leadership guiding the Mar Thoma Diocese of North America 36th Family Conference 2027.",
 };
 
 export default function LeadersPage() {
@@ -17,7 +16,7 @@ export default function LeadersPage() {
         <SectionHeading
           eyebrow="Diocesan Leadership"
           title="Guided by faithful leadership."
-          description="The 36th Family Conference is hosted under the spiritual guidance of the Diocese of North America."
+          description="The 36th Family Conference is hosted under the spiritual guidance of the Mar Thoma Diocese of North America."
         />
 
         <div className="mt-12 overflow-hidden rounded-2xl border border-border bg-surface shadow-sm">
@@ -42,10 +41,9 @@ export default function LeadersPage() {
               <p className="mt-2 text-lg font-medium text-brand">{bishop.title}</p>
               <p className="mt-1 text-muted">{bishop.organization}</p>
               <p className="mt-6 leading-relaxed text-muted">
-                 Under the leadership of our Diocesan Bishop, the 36th Family Conference brings
+                Under the leadership of our Diocesan Bishop, the 36th Family Conference brings
                 together parishes across North America for worship, fellowship, and shared
-                mission. Additional council and committee members will be listed here as
-                conference planning continues.
+                mission.
               </p>
               <a
                 href={conference.councilUrl}
@@ -59,17 +57,58 @@ export default function LeadersPage() {
           </div>
         </div>
 
-        <div className="mt-12 rounded-2xl bg-surface-muted p-8 text-center sm:p-10">
-          <p className="text-muted">
-            Additional conference committee members and parish representatives will be
-            announced as planning progresses.
+        <div className="mt-8">
+          {speakers
+            .filter((speaker) => speaker.role === "Main Speaker")
+            .map((speaker) => (
+              <article
+                key={speaker.name}
+                className="rounded-2xl border border-border bg-surface p-6 shadow-sm sm:p-8"
+              >
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand">
+                  {speaker.role}
+                </p>
+                <h2 className="mt-3 font-[family-name:var(--font-display)] text-2xl font-semibold tracking-tight sm:text-3xl">
+                  {speaker.name}
+                </h2>
+                {"office" in speaker && speaker.office ? (
+                  <p className="mt-2 text-muted">{speaker.office}</p>
+                ) : null}
+              </article>
+            ))}
+        </div>
+
+        <div className="mt-12">
+          <SectionHeading
+            eyebrow={conference.host}
+            title="For questions, contact"
+            description="Reach the MidWest Regional Activities Committee directly."
+          />
+          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {committee.map((member) => (
+              <article
+                key={member.name}
+                className="rounded-2xl border border-border bg-surface p-6 shadow-sm"
+              >
+                <h3 className="text-lg font-semibold">{member.name}</h3>
+                <p className="mt-1 text-sm text-muted">{member.role}</p>
+                <a
+                  href={`tel:${member.phone.replace(/[^\d+]/g, "")}`}
+                  className="mt-3 inline-flex text-sm font-semibold text-brand hover:underline"
+                >
+                  {member.phone}
+                </a>
+              </article>
+            ))}
+          </div>
+          <p className="mt-8 text-center">
+            <a
+              href={`mailto:${conference.contactEmail}`}
+              className="text-sm font-semibold text-brand hover:underline"
+            >
+              {conference.contactEmail}
+            </a>
           </p>
-          <Link
-            href="/contact/"
-            className="mt-4 inline-flex text-sm font-semibold text-brand hover:underline"
-          >
-            Contact the diocese office →
-          </Link>
         </div>
       </div>
     </div>
