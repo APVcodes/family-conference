@@ -113,10 +113,13 @@ export function formatUsd(amount: number) {
   }).format(amount);
 }
 
-/** Stripe rejects USD card charges under $0.50. Full test charges use $0.50 so they stay distinct from installments. */
+/** Stripe rejects USD charges under $0.50. Card pay-in-full tests use $0.50. ACH pay-in-full tests use $0.55. */
 export const testPaymentAmount = 0.5;
-/** Each test installment is $0.55: one today, one tomorrow. */
+export const testAchPaymentAmount = 0.55;
+/** Each card test installment is $0.55: one today, one tomorrow. */
 export const testInstallmentAmount = 0.55;
+/** Each ACH test installment is $0.56: one today, one tomorrow. */
+export const testAchInstallmentAmount = 0.56;
 
 export function testInstallmentDueLabel(now = new Date()) {
   const tomorrow = new Date(now);
@@ -147,8 +150,9 @@ export function chargeWithProcessingFee(netDollars: number, method: PaymentMetho
 export function priceForMethod(packageTotal: number, plan: PaymentPlan, method: PaymentMethod) {
   if (plan === "installments") {
     const schedule = paymentSchedule(packageTotal, "installments");
-    const today = chargeWithProcessingFee(schedule.dueToday, "card");
-    const later = chargeWithProcessingFee(schedule.balance, "card");
+    const installmentMethod = method === "pay-later" ? "card" : method;
+    const today = chargeWithProcessingFee(schedule.dueToday, installmentMethod);
+    const later = chargeWithProcessingFee(schedule.balance, installmentMethod);
     return {
       dueToday: today.chargeCents / 100,
       balance: later.chargeCents / 100,

@@ -15,6 +15,8 @@ import {
   quoteRegistration,
   regions,
   testInstallmentAmount,
+  testAchPaymentAmount,
+  testAchInstallmentAmount,
   testInstallmentDueLabel,
   testPaymentAmount,
   type PaymentMethod,
@@ -89,8 +91,9 @@ export default function RegistrationForm() {
     tier,
   );
   const testMode = testCode.length > 0;
-  const cardInstallments = (installmentsAvailable() && paymentMethod === "card") || testMode;
-  const selectedPlan: PaymentPlan = cardInstallments ? paymentPlan : "full";
+  const installmentMethod = paymentMethod === "card" || paymentMethod === "ach";
+  const showInstallments = (installmentsAvailable() && installmentMethod) || testMode;
+  const selectedPlan: PaymentPlan = showInstallments ? paymentPlan : "full";
   const schedule = paymentSchedule(quote.total, selectedPlan);
   const testInstallments = testMode && selectedPlan === "installments";
   const fullPrice =
@@ -98,14 +101,16 @@ export default function RegistrationForm() {
       ? priceForMethod(quote.total, "full", paymentMethod)
       : null;
   const installmentPrice =
-    !testMode && paymentMethod === "card" && quote.occupancy > 0
-      ? priceForMethod(quote.total, "installments", "card")
+    !testMode && installmentMethod && quote.occupancy > 0
+      ? priceForMethod(quote.total, "installments", paymentMethod)
       : null;
   const priced = selectedPlan === "installments" ? installmentPrice : fullPrice;
+  const testFullAmount = paymentMethod === "ach" ? testAchPaymentAmount : testPaymentAmount;
+  const testInstallmentCharge = paymentMethod === "ach" ? testAchInstallmentAmount : testInstallmentAmount;
   const dueToday = testInstallments
-    ? testInstallmentAmount
+    ? testInstallmentCharge
     : testMode
-      ? testPaymentAmount
+      ? testFullAmount
       : (priced?.dueToday ?? schedule.dueToday);
   const balanceDueLabel = testInstallments ? testInstallmentDueLabel() : installmentDueLabel;
 
@@ -528,25 +533,30 @@ export default function RegistrationForm() {
         )}
         {testMode && (
           <p className="mt-4 rounded-xl border border-brand/30 bg-white px-4 py-3 text-sm text-brand">
-            Test payment is on. Pay in full charges {formatUsd(testPaymentAmount)}. Two installments charge{" "}
-            {formatUsd(testInstallmentAmount)} today and {formatUsd(testInstallmentAmount)} tomorrow. The package
-            total is not charged. Open this page without <span className="font-medium">?test=</span> in the address
-            to take a real payment.
+            Test payment is on. Card pay in full charges {formatUsd(testPaymentAmount)}. Card installments charge{" "}
+            {formatUsd(testInstallmentAmount)} today and {formatUsd(testInstallmentAmount)} tomorrow. ACH pay in full
+            charges {formatUsd(testAchPaymentAmount)}. ACH installments charge {formatUsd(testAchInstallmentAmount)} today
+            and {formatUsd(testAchInstallmentAmount)} tomorrow. The package total is not charged. Open this page without{" "}
+            <span className="font-medium">?test=</span> in the address to take a real payment.
           </p>
         )}
-        {quote.occupancy > 0 && !testMode && (
+        {quote.occupancy > 0 && (
           <fieldset className="mt-6 space-y-3">
             <legend className="text-sm font-semibold text-foreground">Payment method</legend>
-            <p className="text-sm leading-relaxed text-muted">
-              Stripe’s processing fee is added to the package price, so the conference receives the package
-              amount. Card is 2.9% + $0.30. ACH bank debit is 0.8%, capped at $5. Pay later is 5.99% + $0.30.
-              These are Stripe’s standard US rates.{" "}
-              <a className="font-semibold text-brand hover:underline" href="https://stripe.com/pricing#standard-pricing" target="_blank" rel="noreferrer">
-                Stripe’s pricing
-              </a>
-              .
-            </p>
-            {paymentMethodOptions.map((option) => (
+            {!testMode && (
+              <p className="text-sm leading-relaxed text-muted">
+                Stripe’s processing fee is added to the package price, so the conference receives the package
+                amount. Card is 2.9% + $0.30. ACH bank debit is 0.8%, capped at $5. Pay later is 5.99% + $0.30.
+                These are Stripe’s standard US rates. On two installments, the ACH cap applies to each payment.{" "}
+                <a className="font-semibold text-brand hover:underline" href="https://stripe.com/pricing#standard-pricing" target="_blank" rel="noreferrer">
+                  Stripe’s pricing
+                </a>
+                .
+              </p>
+            )}
+            {paymentMethodOptions
+              .filter((option) => !testMode || option.id !== "pay-later")
+              .map((option) => (
               <label key={option.id} className="flex items-start gap-3 text-sm">
                 <input
                   type="radio"
@@ -564,7 +574,7 @@ export default function RegistrationForm() {
             ))}
           </fieldset>
         )}
-        {quote.occupancy > 0 && cardInstallments && (
+        {quote.occupancy > 0 && showInstallments && (
           <fieldset className="mt-6 space-y-3">
             <legend className="text-sm font-semibold text-foreground">How would you like to pay?</legend>
             <label className="flex items-start gap-3 text-sm">
@@ -579,7 +589,7 @@ export default function RegistrationForm() {
               <span>
                 <span className="font-medium text-foreground">Pay in full</span>
                 <span className="mt-0.5 block text-muted">
-                  {formatUsd(testMode ? testPaymentAmount : (fullPrice?.dueToday ?? quote.total))} today
+                  {formatUsd(testMode ? testFullAmount : (fullPrice?.dueToday ?? quote.total))} today
                 </span>
               </span>
             </label>
@@ -596,8 +606,8 @@ export default function RegistrationForm() {
                 <span className="font-medium text-foreground">Two installments</span>
                 <span className="mt-0.5 block text-muted">
                   {testMode
-                    ? `${formatUsd(testInstallmentAmount)} today, then ${formatUsd(testInstallmentAmount)} tomorrow, charged automatically to the same card`
-                    : `${formatUsd(installmentPrice?.dueToday ?? paymentSchedule(quote.total, "installments").dueToday)} today, then ${formatUsd(installmentPrice?.balance ?? paymentSchedule(quote.total, "installments").balance)} on March 1, 2027, charged automatically to the same card`}
+                    ? `${formatUsd(testInstallmentCharge)} today, then ${formatUsd(testInstallmentCharge)} tomorrow, ${paymentMethod === "ach" ? "debited from the same bank account" : "charged automatically to the same card"}`
+                    : `${formatUsd(installmentPrice?.dueToday ?? paymentSchedule(quote.total, "installments").dueToday)} today, then ${formatUsd(installmentPrice?.balance ?? paymentSchedule(quote.total, "installments").balance)} on March 1, 2027, ${paymentMethod === "ach" ? "debited from the same bank account" : "charged automatically to the same card"}`}
                 </span>
               </span>
             </label>
@@ -610,8 +620,9 @@ export default function RegistrationForm() {
         <p className="mt-3">
           Payment is processed by Stripe. You enter payment details on Stripe’s secure page. The Mar Thoma
           Diocese of North America does not see or store your card or bank account. The amount due includes Stripe’s processing fee for the
-          method you choose. Stripe’s own terms and privacy policy apply. After payment, a confirmation email
-          with your registration details is sent to the primary registrant. Stripe also emails a payment receipt.
+          method you choose. Stripe’s own terms and privacy policy apply. After the first payment is recorded, a
+          confirmation email with your registration details is sent to the primary registrant. A bank debit can
+          take several business days to clear. Stripe also emails a payment receipt.
         </p>
         <label className="mt-4 flex items-start gap-3 text-foreground">
           <input

@@ -19,8 +19,9 @@
  * 8. To collect the second installment automatically, run installInstallmentTrigger
  *    once from the Apps Script editor. It charges the saved card on March 1, 2027.
  * 9. For a private test charge, add script property TEST_PAYMENT_SECRET.
- *    Open the registration page with ?test= that secret. Pay in full charges $0.50.
- *    Two installments charge $0.55 today and $0.55 tomorrow. Stripe cannot charge $0.10.
+ *    Open the registration page with ?test= that secret. Card pay in full charges $0.50.
+ *    Card installments charge $0.55 today and $0.55 tomorrow. ACH pay in full charges $0.55.
+ *    ACH installments charge $0.56 today and $0.56 tomorrow. Stripe cannot charge under $0.50.
  *
  * Redeploy as a new version after every script change.
  */
@@ -286,6 +287,7 @@ var INSTALLMENT_HEADERS = [
   "Due at",
   "Status",
   "Second payment ID",
+  "Stripe type",
 ];
 
 var CATEGORY_LABELS = {
@@ -346,7 +348,12 @@ function confirmPayment_(sessionId) {
   var session = stripeRequest_(
     "/checkout/sessions/" + encodeURIComponent(sessionId) + "?expand[]=payment_intent"
   );
-  if (session.payment_status !== "paid") {
+  var intent = session.payment_intent;
+  var intentStatus = intent && typeof intent === "object" ? intent.status : "";
+  var firstPaymentRecorded =
+    session.status === "complete" &&
+    (session.payment_status === "paid" || intentStatus === "succeeded" || intentStatus === "processing");
+  if (!firstPaymentRecorded) {
     throw new Error("Payment is not complete yet.");
   }
   var registrationId = session.metadata && session.metadata.registrationId;
@@ -433,7 +440,7 @@ function normalizeRegistration_(data) {
   }
   var payment = buildPayment_(quote.total, data.testCode ? "full" : data.paymentPlan);
   if (!String(data.testCode || "").trim()) payment = applyProcessingFee_(payment, data.paymentMethod);
-  payment = applyTestPayment_(payment, data.testCode, data.paymentPlan);
+  payment = applyTestPayment_(payment, data.testCode, data.paymentPlan, data.paymentMethod);
   participants.forEach(function (person, index) {
     person.billing = quote.lines[index].billing;
     person.billingLabel = BILLING_LABELS[person.billing];
@@ -477,11 +484,12 @@ function applyProcessingFee_(payment, method) {
   };
   var selected = methods[method];
   if (!selected) throw new Error("Choose a payment method.");
-  if (payment.balanceCents > 0 && method !== "card") {
-    throw new Error("The March installment plan is available for card payments. ACH and pay later are charged in full.");
+  if (payment.balanceCents > 0 && method !== "card" && method !== "ach") {
+    throw new Error("The March installment plan is available for card and ACH bank debit. Pay later is charged in full.");
   }
-  var today = chargeWithProcessingFee_(payment.chargeCents / 100, method === "ach" || method === "pay-later" ? method : "card");
-  var later = payment.balanceCents > 0 ? chargeWithProcessingFee_(payment.balanceCents / 100, "card") : { chargeCents: 0, feeCents: 0 };
+  var feeMethod = method === "ach" || method === "pay-later" ? method : "card";
+  var today = chargeWithProcessingFee_(payment.chargeCents / 100, feeMethod);
+  var later = payment.balanceCents > 0 ? chargeWithProcessingFee_(payment.balanceCents / 100, feeMethod) : { chargeCents: 0, feeCents: 0 };
   payment.chargeCents = today.chargeCents;
   payment.balanceCents = later.chargeCents;
   payment.feeCents = today.feeCents + later.feeCents;
@@ -490,40 +498,44 @@ function applyProcessingFee_(payment, method) {
   return payment;
 }
 
-function applyTestPayment_(payment, testCode, plan) {
+function applyTestPayment_(payment, testCode, plan, method) {
   var code = String(testCode || "").trim();
   if (!code) return payment;
   var secret = PropertiesService.getScriptProperties().getProperty("TEST_PAYMENT_SECRET");
   if (!secret || code !== String(secret).trim()) {
     throw new Error("Test payment code was not accepted.");
   }
+  var ach = method === "ach";
+  var methodLabel = ach ? "ACH bank debit" : "Card";
+  var stripeType = ach ? "us_bank_account" : "card";
   if (plan === "installments") {
     var due = new Date();
     due.setDate(due.getDate() + 1);
     due.setHours(0, 5, 0, 0);
+    var installmentCents = ach ? 56 : 55;
     return {
       planLabel: "Test payment — two installments",
-      chargeCents: 55,
-      balanceCents: 55,
+      chargeCents: installmentCents,
+      balanceCents: installmentCents,
       dueLabel: Utilities.formatDate(due, Session.getScriptTimeZone(), "MMMM d, yyyy"),
       dueAt: due.toISOString(),
       chargeName: "36th Family Conference 2027 — test installment 1 of 2",
       feeCents: 0,
-      methodLabel: "Card",
-      stripeType: "card",
+      methodLabel: methodLabel,
+      stripeType: stripeType,
       testPayment: true,
     };
   }
   return {
     planLabel: "Test payment — paid in full",
-    chargeCents: 50,
+    chargeCents: ach ? 55 : 50,
     balanceCents: 0,
     dueLabel: "",
     dueAt: "",
     chargeName: "36th Family Conference 2027 — test payment",
     feeCents: 0,
-    methodLabel: "Card",
-    stripeType: "card",
+    methodLabel: methodLabel,
+    stripeType: stripeType,
     testPayment: true,
   };
 }
@@ -588,14 +600,17 @@ function registrationPaymentLine_(quote, data) {
     money_((payment.feeCents || 0) / 100) +
     ".";
   if (payment.balanceCents > 0) {
+    var laterTarget = payment.stripeType === "us_bank_account" ? "the same bank account" : "the same card";
+    var ach = payment.stripeType === "us_bank_account";
     return (
-      "Amount paid today through Stripe: " +
+      (ach ? "ACH installment 1 of 2 submitted today: " : "Amount paid today through Stripe: ") +
       money_(payment.chargeCents / 100) +
-      " (installment 1 of 2). Remaining balance: " +
+      (ach ? ". The bank debit can take several business days to clear. " : " (installment 1 of 2). ") +
+      "Remaining balance: " +
       money_(payment.balanceCents / 100) +
       (payment.cardSaved === false
-        ? ". We could not save the card for the second charge, so the registration team will contact you about the remaining balance."
-        : ", to be charged automatically on March 1, 2027 to the same card.") +
+        ? ". We could not save the payment method for the second charge, so the registration team will contact you about the remaining balance."
+        : ", to be " + (ach ? "debited from " : "charged automatically on March 1, 2027 to ") + laterTarget + (ach ? " on March 1, 2027." : ".")) +
       feeNote
     );
   }
@@ -751,8 +766,9 @@ function scheduleInstallment_(registrationId, registration, session) {
     paymentMethod,
     registration.payment.balanceCents,
     registration.payment.dueAt ? new Date(registration.payment.dueAt) : new Date("2027-03-01T06:00:00.000Z"),
-    saved ? "scheduled" : "card not saved",
+    saved ? "scheduled" : "payment method not saved",
     "",
+    registration.payment.stripeType || "card",
   ]);
 }
 
@@ -764,6 +780,10 @@ function installInstallmentTrigger() {
   ScriptApp.newTrigger("chargeDueInstallments").timeBased().everyDays(1).create();
 }
 
+function isTestInstallmentCents_(cents) {
+  return cents === 55 || cents === 56;
+}
+
 function chargeDueInstallments() {
   var lock = LockService.getScriptLock();
   lock.waitLock(30000);
@@ -773,14 +793,33 @@ function chargeDueInstallments() {
     var values = sheet.getDataRange().getValues();
     var now = new Date().getTime();
     for (var i = 1; i < values.length; i++) {
-      if (values[i][7] !== "scheduled") continue;
-      if (new Date(values[i][6]).getTime() > now) continue;
+      var status = values[i][7];
       var registrationId = values[i][0];
       var email = values[i][1];
       var name = values[i][2];
       var balanceCents = Number(values[i][5]);
+      var stripeType = values[i][9] || "card";
+      if (status === "processing" && values[i][8]) {
+        try {
+          var existing = stripeRequest_("/payment_intents/" + encodeURIComponent(values[i][8]));
+          if (existing.status === "succeeded") {
+            sheet.getRange(i + 1, 8).setValue("paid");
+            updateRegistrationPaymentStatus_(
+              registrationId,
+              isTestInstallmentCents_(balanceCents) ? "Test payment — paid in full" : "Paid in full",
+              0
+            );
+          } else if (existing.status === "canceled" || existing.status === "requires_payment_method") {
+            sheet.getRange(i + 1, 8).setValue("failed");
+            emailInstallmentProblem_(email, name, balanceCents, stripeType, existing.last_payment_error && existing.last_payment_error.message);
+          }
+        } catch (ignore) {}
+        continue;
+      }
+      if (status !== "scheduled") continue;
+      if (new Date(values[i][6]).getTime() > now) continue;
       try {
-        var intent = stripeRequest_("/payment_intents", {
+        var payload = {
           amount: String(balanceCents),
           currency: "usd",
           customer: values[i][3],
@@ -788,30 +827,41 @@ function chargeDueInstallments() {
           off_session: "true",
           confirm: "true",
           description:
-            balanceCents === 55
+            isTestInstallmentCents_(balanceCents)
               ? "36th Family Conference 2027 — test installment 2 of 2"
               : "36th Family Conference 2027 — installment 2 of 2",
           "metadata[registrationId]": registrationId,
-        });
-        sheet.getRange(i + 1, 8).setValue("paid");
+        };
+        if (stripeType === "us_bank_account") payload["payment_method_types[0]"] = "us_bank_account";
+        var intent = stripeRequest_("/payment_intents", payload);
+        var achPending = stripeType === "us_bank_account" && intent.status === "processing";
+        sheet.getRange(i + 1, 8).setValue(achPending ? "processing" : "paid");
         sheet.getRange(i + 1, 9).setValue(intent.id);
-        updateRegistrationPaymentStatus_(
-          registrationId,
-          balanceCents === 55 ? "Test payment — paid in full" : "Paid in full",
-          0
-        );
+        if (!achPending) {
+          updateRegistrationPaymentStatus_(
+            registrationId,
+            isTestInstallmentCents_(balanceCents) ? "Test payment — paid in full" : "Paid in full",
+            0
+          );
+        }
         MailApp.sendEmail({
           to: email,
           bcc: NOTIFY_EMAIL,
           name: "36th Family Conference 2027",
           replyTo: CONFERENCE_EMAIL,
-          subject: (balanceCents === 55 ? "TEST installment received — " : "Installment received — ") + "36th Family Conference 2027",
+          subject: (isTestInstallmentCents_(balanceCents) ? "TEST installment received — " : "Installment received — ") + "36th Family Conference 2027",
           body:
             "Hello " +
             name +
-            ",\n\nWe charged the remaining " +
-            money_(balanceCents / 100) +
-            " for your 36th Family Conference 2027 registration. Your balance is now paid in full.\n\nQuestions: " +
+            ",\n\n" +
+            (achPending
+              ? "We submitted the remaining " +
+                money_(balanceCents / 100) +
+                " bank debit for your 36th Family Conference 2027 registration. It can take several business days to clear."
+              : "We charged the remaining " +
+                money_(balanceCents / 100) +
+                " for your 36th Family Conference 2027 registration. Your balance is now paid in full.") +
+            "\n\nQuestions: " +
             CONFERENCE_EMAIL +
             " or " +
             CONFERENCE_PHONE +
@@ -819,29 +869,36 @@ function chargeDueInstallments() {
         });
       } catch (error) {
         sheet.getRange(i + 1, 8).setValue("failed");
-        MailApp.sendEmail({
-          to: email,
-          bcc: NOTIFY_EMAIL,
-          name: "36th Family Conference 2027",
-          replyTo: CONFERENCE_EMAIL,
-          subject: "Installment payment needs attention — 36th Family Conference 2027",
-          body:
-            "Hello " +
-            name +
-            ",\n\nWe could not charge the remaining " +
-            money_(balanceCents / 100) +
-            " on the card used for your first installment. Please contact " +
-            CONFERENCE_EMAIL +
-            " or " +
-            CONFERENCE_PHONE +
-            " to complete the balance.\n\n" +
-            error,
-        });
+        emailInstallmentProblem_(email, name, balanceCents, stripeType, error);
       }
     }
   } finally {
     lock.releaseLock();
   }
+}
+
+function emailInstallmentProblem_(email, name, balanceCents, stripeType, error) {
+  var method = stripeType === "us_bank_account" ? "bank account" : "card";
+  MailApp.sendEmail({
+    to: email,
+    bcc: NOTIFY_EMAIL,
+    name: "36th Family Conference 2027",
+    replyTo: CONFERENCE_EMAIL,
+    subject: "Installment payment needs attention — 36th Family Conference 2027",
+    body:
+      "Hello " +
+      name +
+      ",\n\nWe could not collect the remaining " +
+      money_(balanceCents / 100) +
+      " from the " +
+      method +
+      " used for your first installment. Please contact " +
+      CONFERENCE_EMAIL +
+      " or " +
+      CONFERENCE_PHONE +
+      " to complete the balance.\n\n" +
+      error,
+  });
 }
 
 function updateRegistrationPaymentStatus_(registrationId, status, balance) {
