@@ -4,4 +4,4 @@
  * Deploy as a web app (execute as you, accessible to anyone), then paste the /exec URL here.
  */
 export const registrationEndpoint =
-  "https://script.google.com/macros/s/AKfycbwp4RDdgy0oeki45difZKcy5SrQzQPyVuVADQqTqEoE34TSV_fYICcVilnyhq1J3_Y/exec";
+  "https://script.google.com/macros/s/AKfycbwIZqRRcroB04GcS9G1QHFDJT466DyokuPOEhkmYezuHR-03pVg245revtqriLdx7k/exec";

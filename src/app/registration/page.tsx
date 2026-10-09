@@ -3,7 +3,7 @@ import RegistrationComingSoon from "@/components/RegistrationComingSoon";
 import RegistrationExperience from "@/components/RegistrationExperience";
 
 // Flip to true to show the full registration experience again.
-const REGISTRATION_OPEN = false;
+const REGISTRATION_OPEN = true;
 
 export const metadata: Metadata = {
   title: "Registration",

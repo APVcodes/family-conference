@@ -13,7 +13,7 @@ type Summary = {
   parish: string;
   region: string;
   packageLabel: string;
-  roomLabel?: string;
+  roomCount?: number;
   total: number;
   paymentPlan?: string;
   charged?: number;
@@ -117,12 +117,12 @@ export default function RegistrationPaymentResult() {
             <dt className="text-muted">Package</dt>
             <dd className="text-right font-medium">{summary.packageLabel}</dd>
           </div>
-          {summary.roomLabel && (
+          {summary.roomCount ? (
             <div className="flex justify-between gap-4">
-              <dt className="text-muted">Room needed</dt>
-              <dd className="text-right font-medium">{summary.roomLabel}</dd>
+              <dt className="text-muted">Number of rooms</dt>
+              <dd className="text-right font-medium">{summary.roomCount}</dd>
             </div>
-          )}
+          ) : null}
           {summary.paymentPlan && (
             <div className="flex justify-between gap-4">
               <dt className="text-muted">Payment plan</dt>

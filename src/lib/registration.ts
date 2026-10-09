@@ -32,36 +32,30 @@ export const paymentMethodOptions: {
   { id: "pay-later", label: "Pay later", rate: "5.99% + $0.30" },
 ];
 
-export const packages: {
+export type BasePackage = {
   id: PackageId;
   label: string;
-  included: number;
+  /** Adults (ages 13+) covered by the base package. */
+  adults: number;
+  /** Children (ages 6–12) covered by the base package. */
+  children: number;
   earlyBird: number;
   regular: number;
-}[] = [
-  { id: "single", label: "Single Occupancy", included: 1, earlyBird: 849, regular: 949 },
-  {
-    id: "double",
-    label: "Double Occupancy (per room)",
-    included: 2,
-    earlyBird: 1449,
-    regular: 1599,
-  },
-  {
-    id: "family3",
-    label: "Family of 3 (per room)",
-    included: 3,
-    earlyBird: 1749,
-    regular: 1999,
-  },
-  {
-    id: "family4",
-    label: "Family of 4 (per room)",
-    included: 4,
-    earlyBird: 1899,
-    regular: 2199,
-  },
+};
+
+export const packages: BasePackage[] = [
+  { id: "single", label: "Single Occupancy", adults: 1, children: 0, earlyBird: 849, regular: 949 },
+  { id: "double", label: "Double Occupancy", adults: 2, children: 0, earlyBird: 1449, regular: 1599 },
+  { id: "family3", label: "Family of 3", adults: 2, children: 1, earlyBird: 1749, regular: 1999 },
+  { id: "family4", label: "Family of 4", adults: 2, children: 2, earlyBird: 1899, regular: 2199 },
 ];
+
+/** Plain-text description of who a base package covers, e.g. "2 adults and 1 child (6–12)". */
+export function packageIncludedText(item: Pick<BasePackage, "adults" | "children">) {
+  const adults = `${item.adults} ${item.adults === 1 ? "adult" : "adults"}`;
+  if (item.children === 0) return adults;
+  return `${adults} and ${item.children} ${item.children === 1 ? "child" : "children"} (6–12)`;
+}
 
 export const extraRates = {
   adult: { earlyBird: 449, regular: 499 },
@@ -178,77 +172,82 @@ export function paymentSchedule(total: number, plan: PaymentPlan) {
   return { plan: "full" as const, dueToday: total, balance: 0, dueLabel: "" };
 }
 
-export function packageById(id: PackageId) {
-  return packages.find((item) => item.id === id) ?? packages[0];
-}
-
 export function ageCategoryById(id: AgeCategory) {
   return ageCategories.find((item) => item.id === id)!;
 }
 
-function billingRank(category: AgeCategory) {
-  const billing = ageCategoryById(category).billing;
-  if (billing === "adult") return 2;
-  if (billing === "child") return 1;
-  return 0;
+/** Largest base package whose adults and children are both covered by the room's group. */
+function packageForRoom(adults: number, children: number) {
+  let best = packages[0];
+  for (const item of packages) {
+    if (adults >= item.adults && children >= item.children) best = item;
+  }
+  return best;
 }
 
-const packageByOccupancy: PackageId[] = ["single", "double", "family3", "family4"];
+/**
+ * Hotel policy: a room holds at most four people, free children included. Larger groups are not blocked;
+ * the registration is collected and the team contacts the registrant to finish it.
+ */
+export const MAX_AUTOMATIC_PARTY = 4;
 
-/** Children ages 1–5 are free and do not count toward the room rate. */
+/**
+ * One room is one base package. Anyone past the base package is billed at the extra adult or
+ * child rate, and children ages 1–5 are free and never priced. A registration needs at least one
+ * adult. Parties of more than four people (free children included) get no automatic price and
+ * `needsTeamFollowUp` is set instead.
+ */
 export function quoteRegistration(categories: (AgeCategory | "")[], tier: PricingTier) {
   const partySize = categories.filter((category) => category !== "").length;
   const extraAdultRate = extraRates.adult[tier];
   const extraChildRate = extraRates.child[tier];
 
-  const ranked = categories
-    .map((category, index) => ({
-      category,
-      index,
-      rank: category ? billingRank(category) : 0,
-    }))
-    .filter((person) => person.rank > 0)
-    .sort((a, b) => b.rank - a.rank || a.index - b.index);
+  const adultIndexes: number[] = [];
+  const childIndexes: number[] = [];
+  categories.forEach((category, index) => {
+    if (!category) return;
+    const billing = ageCategoryById(category).billing;
+    if (billing === "adult") adultIndexes.push(index);
+    else if (billing === "child") childIndexes.push(index);
+  });
 
-  const occupancy = ranked.length;
-  const selected = occupancy === 0 ? null : packageById(packageByOccupancy[Math.min(occupancy, 4) - 1]);
-  const room = partySize === 0 ? null : packageById(packageByOccupancy[Math.min(partySize, 4) - 1]);
-  const includedIndexes = new Set(
-    ranked.slice(0, selected?.included ?? 0).map((person) => person.index),
-  );
+  const occupancy = adultIndexes.length + childIndexes.length;
+  const needsTeamFollowUp = partySize > MAX_AUTOMATIC_PARTY;
+  const priced = adultIndexes.length > 0 && !needsTeamFollowUp;
+
+  const base = priced ? packageForRoom(adultIndexes.length, childIndexes.length) : null;
+  const extraAdultIndexes = new Set(adultIndexes.slice(base?.adults ?? 0));
+  const extraChildIndexes = new Set(childIndexes.slice(base?.children ?? 0));
 
   const lines = categories.map((category, index) => {
     if (!category) return null;
-    if (billingRank(category) === 0) return { category, billing: "free" as const };
-    if (includedIndexes.has(index)) return { category, billing: "included" as const };
-    if (ageCategoryById(category).billing === "child") {
-      return { category, billing: "extra-child" as const };
-    }
-    return { category, billing: "extra-adult" as const };
+    if (ageCategoryById(category).billing === "free") return { category, billing: "free" as const };
+    if (extraAdultIndexes.has(index)) return { category, billing: "extra-adult" as const };
+    if (extraChildIndexes.has(index)) return { category, billing: "extra-child" as const };
+    return { category, billing: "included" as const };
   });
 
-  const extraAdults = lines.filter((line) => line?.billing === "extra-adult").length;
-  const extraChildren = lines.filter((line) => line?.billing === "extra-child").length;
+  const extraAdults = priced ? extraAdultIndexes.size : 0;
+  const extraChildren = priced ? extraChildIndexes.size : 0;
   const freeChildren = lines.filter((line) => line?.billing === "free").length;
-  const packagePrice = selected ? selected[tier] : 0;
-  const needsExtraRoom = partySize > 4;
+  const packagePrice = base ? base[tier] : 0;
 
   return {
     tier,
-    packageId: selected?.id ?? null,
-    packageLabel: selected?.label ?? "",
-    roomLabel: room?.label ?? "",
+    base,
+    roomCount: base ? 1 : 0,
+    needsTeamFollowUp,
+    packageLabel: base?.label ?? "",
     occupancy,
+    adultCount: adultIndexes.length,
+    childCount: childIndexes.length,
     partySize,
-    included: selected?.included ?? 0,
     packagePrice,
     extraAdults,
     extraAdultRate,
     extraChildren,
     extraChildRate,
     freeChildren,
-    needsExtraRoom,
-    roomNote: needsExtraRoom ? "Needs extra room space" : "",
     total: packagePrice + extraAdults * extraAdultRate + extraChildren * extraChildRate,
     lines,
   };
