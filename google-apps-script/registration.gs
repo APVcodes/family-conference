@@ -43,7 +43,7 @@ var REGISTRATION_HEADERS = [
   "Free children (ages 1–5)",
   "Occupancy count",
   "Party size",
-  "Extra room space",
+  "Number of rooms",
   "Total",
   "First name",
   "Last name",
@@ -65,7 +65,6 @@ var REGISTRATION_HEADERS = [
   "Balance due",
   "Payment method",
   "Processing fee",
-  "Room needed",
 ];
 
 var PARTICIPANT_HEADERS = [
@@ -88,10 +87,13 @@ function doPost(e) {
     if (data.action === "create-checkout") {
       return createCheckout_(data);
     }
+    if (data.action === "request-followup") {
+      return requestFollowUp_(data);
+    }
     if (data.action === "confirm-payment") {
       return confirmPayment_(data.sessionId);
     }
-    return json_({ ok: false, error: "Payment is required to complete registration." });
+    return json_({ ok: false, error: "Unknown request. Please refresh the page and try again." });
   } catch (error) {
     return json_({ ok: false, error: String(error) });
   } finally {
@@ -133,7 +135,7 @@ function appendRegistration_(submittedAt, registrationId, data, quote, participa
     quote.freeChildren || 0,
     quote.occupancy || 0,
     quote.partySize || 0,
-    quote.needsExtraRoom ? "Yes — needs extra room space" : "No",
+    quote.roomCount || 0,
     quote.total || 0,
     data.firstName || "",
     data.lastName || "",
@@ -155,7 +157,6 @@ function appendRegistration_(submittedAt, registrationId, data, quote, participa
     data.payment ? data.payment.dueLabel : "",
     data.payment ? data.payment.methodLabel || "" : "",
     data.payment && data.payment.feeCents ? data.payment.feeCents / 100 : 0,
-    quote.roomLabel || "",
   ]);
 }
 
@@ -198,22 +199,42 @@ function getSheet_(name, headers) {
   return sheet;
 }
 
-function sendConfirmation_(registrationId, data, quote, participants) {
-  var participantLines = participants
+/** Registrant, participants, and contact details shared by every registration email. */
+function registrationDetailsText_(data, showBilling) {
+  var participantLines = data.participants
     .map(function (person) {
       return (
         "- " +
         person.name +
         " — " +
         person.categoryLabel +
-        " (" +
-        person.billingLabel +
-        ")\n  Allergies: " +
+        (showBilling ? " (" + person.billingLabel + ")" : "") +
+        "\n  Allergies: " +
         (person.allergies || "none")
       );
     })
     .join("\n");
+  return [
+    "Registrant",
+    data.firstName + " " + data.lastName,
+    data.email,
+    data.phone,
+    "Parish: " + data.parish,
+    "Region: " + data.region,
+    "",
+    "Participants (" + data.participants.length + ")",
+    participantLines,
+    "",
+    "Airport transportation needed: " + data.airportTransportation,
+    "Accessibility accommodations needed: " + data.accessibilityNeeded,
+    data.accessibilityDetails ? "Details: " + data.accessibilityDetails : null,
+    "Emergency contact: " + data.emergencyName + ", " + data.emergencyPhone,
+  ]
+    .filter(function (line) { return line !== null; })
+    .join("\n");
+}
 
+function sendConfirmation_(registrationId, data, quote, participants) {
   var money = function (amount) {
     return "$" + Number(amount || 0).toLocaleString("en-US");
   };
@@ -226,28 +247,14 @@ function sendConfirmation_(registrationId, data, quote, participants) {
     "Registration ID: " + registrationId,
     "Pricing: " + (quote.tierLabel || ""),
     "Package charged: " + (quote.packageLabel || "") + " — " + money(quote.packagePrice),
-    "Room needed: " + (quote.roomLabel || ""),
+    "Number of rooms: " + (quote.roomCount || 0),
     "Extra adults: " + (quote.extraAdults || 0) + " × " + money(quote.extraAdultRate),
     "Extra children (ages 6–12): " + (quote.extraChildren || 0) + " × " + money(quote.extraChildRate),
     "Children ages 1–5 (free): " + (quote.freeChildren || 0),
-    "People counted toward the room rate: " + (quote.occupancy || 0),
+    "People counted toward the package: " + (quote.occupancy || 0),
     registrationPaymentLine_(quote, data),
-    quote.needsExtraRoom ? "Your group has more than four people. The registration team will follow up about extra room space." : null,
     "",
-    "Registrant",
-    data.firstName + " " + data.lastName,
-    data.email,
-    data.phone,
-    "Parish: " + data.parish,
-    "Region: " + data.region,
-    "",
-    "Participants",
-    participantLines,
-    "",
-    "Airport transportation needed: " + data.airportTransportation,
-    "Accessibility accommodations needed: " + data.accessibilityNeeded,
-    data.accessibilityDetails ? "Details: " + data.accessibilityDetails : null,
-    "Emergency contact: " + data.emergencyName + ", " + data.emergencyPhone,
+    registrationDetailsText_(data, true),
     "",
     "Card numbers are entered on Stripe’s page and are not stored by the conference website. Stripe will also email a receipt for this charge.",
     "",
@@ -304,6 +311,65 @@ var BILLING_LABELS = {
   "extra-child": "Extra child",
   free: "Free",
 };
+
+function requestFollowUp_(data) {
+  var registration = normalizeRegistration_(data, true);
+  var registrationId = Utilities.getUuid();
+  var submittedAt = new Date();
+  appendRegistration_(submittedAt, registrationId, registration, registration.quote, registration.participants);
+  appendParticipants_(submittedAt, registrationId, registration.participants);
+  sendFollowUpEmails_(registrationId, registration);
+  return json_({ ok: true, registrationId: registrationId });
+}
+
+function sendFollowUpEmails_(registrationId, data) {
+  var details = registrationDetailsText_(data, false);
+
+  var registrantText = [
+    "Hello " + data.firstName + ",",
+    "",
+    "We received your registration details for the Mar Thoma Diocese of North America 36th Family Conference 2027.",
+    "",
+    "Your registration is not complete yet. Your group has more than four people, and each hotel room holds a maximum of four. Someone from our team will contact you to complete your registration and arrange payment. You do not need to call us.",
+    "",
+    "Registration ID: " + registrationId,
+    "",
+    details,
+    "",
+    "Questions",
+    "Email: " + CONFERENCE_EMAIL,
+    "Phone: " + CONFERENCE_PHONE,
+    "Dates: July 1–4, 2027",
+    "Venue: DoubleTree by Hilton, 1909 Spring Road, Oak Brook, IL 60523",
+    "",
+    "Mar Thoma Diocese of North America",
+  ].join("\n");
+  MailApp.sendEmail({
+    to: data.email,
+    name: "36th Family Conference 2027",
+    replyTo: CONFERENCE_EMAIL,
+    subject: "Registration details received — our team will contact you — 36th Family Conference 2027",
+    body: registrantText,
+  });
+
+  var teamText = [
+    "ACTION NEEDED: contact this registrant to complete a registration for more than four people.",
+    "",
+    "Registration ID: " + registrationId,
+    "Party size: " + data.quote.partySize + " (adults/children counted for price: " + data.quote.occupancy + ", free children ages 1–5: " + data.quote.freeChildren + ")",
+    "",
+    details,
+    "",
+    "Next steps: call the registrant, confirm room arrangement and price, then send a Stripe payment link or invoice (or arrange check/Zelle by phone). Update the Payment status column in the Registrations sheet when payment is received.",
+  ].join("\n");
+  MailApp.sendEmail({
+    to: NOTIFY_EMAIL,
+    name: "36th Family Conference 2027",
+    replyTo: data.email,
+    subject: "Needs follow-up: " + data.firstName + " " + data.lastName + " (" + data.quote.partySize + " people)",
+    body: teamText,
+  });
+}
 
 function createCheckout_(data) {
   var registration = normalizeRegistration_(data);
@@ -390,7 +456,7 @@ function confirmPayment_(sessionId) {
       parish: registration.parish,
       region: registration.region,
       packageLabel: registration.quote.packageLabel,
-      roomLabel: registration.quote.roomLabel || "",
+      roomCount: registration.quote.roomCount || 0,
       total: registration.quote.total,
       paymentPlan: registration.payment.planLabel,
       charged: registration.payment.chargeCents / 100,
@@ -403,7 +469,7 @@ function confirmPayment_(sessionId) {
   });
 }
 
-function normalizeRegistration_(data) {
+function normalizeRegistration_(data, followUp) {
   var participants = (data.participants || []).map(function (person) {
     var category = person.category;
     if (!person.name || !CATEGORY_LABELS[category]) {
@@ -433,19 +499,12 @@ function normalizeRegistration_(data) {
     throw new Error("Describe the accessibility accommodations you need.");
   }
   if (!data.emergencyName || !data.emergencyPhone) throw new Error("Enter an emergency contact.");
-  if (!data.disclaimerAccepted) throw new Error("Please acknowledge the payment disclaimer.");
+  if (!followUp && !data.disclaimerAccepted) throw new Error("Please acknowledge the payment disclaimer.");
   var quote = priceRegistration_(participants.map(function (person) { return person.category; }));
-  if (!quote.packageId) {
-    throw new Error("Include at least one participant age 6 or older.");
+  if (quote.adultCount < 1) {
+    throw new Error("Include at least one adult (age 13 or older).");
   }
-  var payment = buildPayment_(quote.total, data.testCode ? "full" : data.paymentPlan);
-  if (!String(data.testCode || "").trim()) payment = applyProcessingFee_(payment, data.paymentMethod);
-  payment = applyTestPayment_(payment, data.testCode, data.paymentPlan, data.paymentMethod);
-  participants.forEach(function (person, index) {
-    person.billing = quote.lines[index].billing;
-    person.billingLabel = BILLING_LABELS[person.billing];
-  });
-  return {
+  var registration = {
     firstName: String(data.firstName).trim(),
     lastName: String(data.lastName).trim(),
     email: String(data.email).trim(),
@@ -459,8 +518,29 @@ function normalizeRegistration_(data) {
     emergencyPhone: String(data.emergencyPhone).trim(),
     participants: participants,
     quote: quote,
-    payment: payment,
   };
+  if (followUp) {
+    if (!quote.needsTeamFollowUp) throw new Error("This registration can be completed online with payment.");
+    participants.forEach(function (person) {
+      person.billing = "pending";
+      person.billingLabel = "Pending team review";
+    });
+    quote.packageLabel = "Team follow-up (more than four people)";
+    registration.paymentStatus = "Needs team follow-up";
+    return registration;
+  }
+  if (quote.needsTeamFollowUp) {
+    throw new Error("Groups of more than four people complete registration with our team. Someone will contact you.");
+  }
+  var payment = buildPayment_(quote.total, data.testCode ? "full" : data.paymentPlan);
+  if (!String(data.testCode || "").trim()) payment = applyProcessingFee_(payment, data.paymentMethod);
+  payment = applyTestPayment_(payment, data.testCode, data.paymentPlan, data.paymentMethod);
+  participants.forEach(function (person, index) {
+    person.billing = quote.lines[index].billing;
+    person.billingLabel = BILLING_LABELS[person.billing];
+  });
+  registration.payment = payment;
+  return registration;
 }
 
 function stripeFeeCents_(chargeCents, method) {
@@ -628,52 +708,60 @@ function money_(amount) {
 
 function priceRegistration_(categories) {
   var tier = new Date().getTime() < new Date("2027-02-01T06:00:00.000Z").getTime() ? "earlyBird" : "regular";
+  // adults = ages 13+, children = ages 6–12. Mirror of src/lib/registration.ts.
   var packages = [
-    { id: "single", label: "Single Occupancy", included: 1, earlyBird: 849, regular: 949 },
-    { id: "double", label: "Double Occupancy (per room)", included: 2, earlyBird: 1449, regular: 1599 },
-    { id: "family3", label: "Family of 3 (per room)", included: 3, earlyBird: 1749, regular: 1999 },
-    { id: "family4", label: "Family of 4 (per room)", included: 4, earlyBird: 1899, regular: 2199 },
+    { label: "Single Occupancy", adults: 1, children: 0, earlyBird: 849, regular: 949 },
+    { label: "Double Occupancy", adults: 2, children: 0, earlyBird: 1449, regular: 1599 },
+    { label: "Family of 3", adults: 2, children: 1, earlyBird: 1749, regular: 1999 },
+    { label: "Family of 4", adults: 2, children: 2, earlyBird: 1899, regular: 2199 },
   ];
   var extraAdultRate = tier === "earlyBird" ? 449 : 499;
   var extraChildRate = tier === "earlyBird" ? 349 : 399;
-  function rank(category) {
-    if (category === "child-free") return 0;
-    if (category === "child") return 1;
-    return 2;
-  }
-  var ranked = categories
-    .map(function (category, index) { return { index: index, rank: rank(category) }; })
-    .filter(function (person) { return person.rank > 0; })
-    .sort(function (a, b) { return b.rank - a.rank || a.index - b.index; });
-  var selected = ranked.length ? packages[Math.min(ranked.length, 4) - 1] : null;
-  var included = {};
-  ranked.slice(0, selected ? selected.included : 0).forEach(function (person) { included[person.index] = true; });
-  var lines = categories.map(function (category, index) {
-    if (rank(category) === 0) return { billing: "free" };
-    if (included[index]) return { billing: "included" };
-    return { billing: category === "child" ? "extra-child" : "extra-adult" };
+  var adultIndexes = [];
+  var childIndexes = [];
+  categories.forEach(function (category, index) {
+    if (category === "child-free") return;
+    if (category === "child") childIndexes.push(index);
+    else adultIndexes.push(index);
   });
-  var extraAdults = lines.filter(function (line) { return line.billing === "extra-adult"; }).length;
-  var extraChildren = lines.filter(function (line) { return line.billing === "extra-child"; }).length;
+  // Hotel policy: a room holds at most four people, free children included.
+  var needsTeamFollowUp = categories.length > 4;
+  var priced = adultIndexes.length > 0 && !needsTeamFollowUp;
+  // Largest base package fully covered by the party.
+  var base = null;
+  if (priced) {
+    base = packages[0];
+    packages.forEach(function (item) {
+      if (adultIndexes.length >= item.adults && childIndexes.length >= item.children) base = item;
+    });
+  }
+  var extraAdultIndexes = adultIndexes.slice(base ? base.adults : 0);
+  var extraChildIndexes = childIndexes.slice(base ? base.children : 0);
+  var lines = categories.map(function (category, index) {
+    if (category === "child-free") return { billing: "free" };
+    if (extraAdultIndexes.indexOf(index) !== -1) return { billing: "extra-adult" };
+    if (extraChildIndexes.indexOf(index) !== -1) return { billing: "extra-child" };
+    return { billing: "included" };
+  });
+  var extraAdults = priced ? extraAdultIndexes.length : 0;
+  var extraChildren = priced ? extraChildIndexes.length : 0;
   var freeChildren = lines.filter(function (line) { return line.billing === "free"; }).length;
-  var packagePrice = selected ? selected[tier] : 0;
-  var partySize = categories.length;
-  var room = partySize ? packages[Math.min(partySize, 4) - 1] : null;
+  var packagePrice = base ? base[tier] : 0;
   return {
     tier: tier,
     tierLabel: tier === "earlyBird" ? "Early bird (through January 31, 2027)" : "Regular (from February 1, 2027)",
-    packageId: selected ? selected.id : "",
-    packageLabel: selected ? selected.label : "",
-    roomLabel: room ? room.label : "",
+    needsTeamFollowUp: needsTeamFollowUp,
+    adultCount: adultIndexes.length,
+    packageLabel: base ? base.label : "",
+    roomCount: base ? 1 : 0,
     packagePrice: packagePrice,
-    occupancy: ranked.length,
-    partySize: partySize,
+    occupancy: adultIndexes.length + childIndexes.length,
+    partySize: categories.length,
     extraAdults: extraAdults,
     extraAdultRate: extraAdultRate,
     extraChildren: extraChildren,
     extraChildRate: extraChildRate,
     freeChildren: freeChildren,
-    needsExtraRoom: categories.length > 4,
     total: packagePrice + extraAdults * extraAdultRate + extraChildren * extraChildRate,
     lines: lines,
   };

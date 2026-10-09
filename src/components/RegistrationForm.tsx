@@ -52,6 +52,15 @@ function newParticipant(): Participant {
   return { id: crypto.randomUUID(), name: "", category: "", hasAllergy: "", allergies: "" };
 }
 
+function FieldError({ message }: { message?: string }) {
+  if (!message) return null;
+  return (
+    <span data-field-error role="alert" className="mt-1.5 block text-xs font-medium text-red-700">
+      {message}
+    </span>
+  );
+}
+
 function digits(value: string) {
   return value.replace(/\D/g, "");
 }
@@ -76,6 +85,8 @@ export default function RegistrationForm() {
   const [website, setWebsite] = useState("");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [followUpDone, setFollowUpDone] = useState<{ id: string; email: string } | null>(null);
   const [testCode, setTestCode] = useState("");
 
   useEffect(() => {
@@ -97,11 +108,11 @@ export default function RegistrationForm() {
   const schedule = paymentSchedule(quote.total, selectedPlan);
   const testInstallments = testMode && selectedPlan === "installments";
   const fullPrice =
-    !testMode && paymentMethod && quote.occupancy > 0
+    !testMode && paymentMethod && quote.roomCount > 0
       ? priceForMethod(quote.total, "full", paymentMethod)
       : null;
   const installmentPrice =
-    !testMode && installmentMethod && quote.occupancy > 0
+    !testMode && installmentMethod && quote.roomCount > 0
       ? priceForMethod(quote.total, "installments", paymentMethod)
       : null;
   const priced = selectedPlan === "installments" ? installmentPrice : fullPrice;
@@ -120,64 +131,56 @@ export default function RegistrationForm() {
     );
   }
 
+  function validate() {
+    const found: Record<string, string> = {};
+    if (!firstName.trim()) found.firstName = "Enter the registrant’s first name.";
+    if (!lastName.trim()) found.lastName = "Enter the registrant’s last name.";
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) found.email = "Enter a valid email address for the confirmation.";
+    if (digits(phone).length < 10) found.phone = "Enter a phone number with at least 10 digits.";
+    if (!parish.trim()) found.parish = "Enter the parish.";
+    if (!region) found.region = "Select a region.";
+    participants.forEach((person) => {
+      if (!person.name.trim()) found[`name-${person.id}`] = "Enter this participant’s full name.";
+      if (!person.category) found[`category-${person.id}`] = "Select an age group.";
+      if (!person.hasAllergy) found[`allergy-${person.id}`] = "Tell us whether this participant has allergies.";
+      else if (person.hasAllergy === "yes" && !person.allergies.trim()) {
+        found[`allergies-${person.id}`] = "List the allergies for this participant.";
+      }
+    });
+    if (quote.adultCount < 1 && participants.every((person) => person.category)) {
+      found.participants = "Include at least one adult (age 13 or older) in each registration.";
+    }
+    if (!airportTransportation) found.airport = "Tell us whether airport transportation is needed.";
+    if (!accessibilityNeeded) found.accessibility = "Tell us whether accessibility accommodations are needed.";
+    else if (accessibilityNeeded === "yes" && !accessibilityDetails.trim()) {
+      found.accessibilityDetails = "Describe the accessibility accommodations you need.";
+    }
+    if (!emergencyName.trim()) found.emergencyName = "Enter an emergency contact name.";
+    if (digits(emergencyPhone).length < 10) found.emergencyPhone = "Enter an emergency contact phone number.";
+    if (!quote.needsTeamFollowUp) {
+      if (!testMode && !paymentMethod && quote.roomCount > 0) found.paymentMethod = "Choose a payment method.";
+      if (!disclaimerAccepted) found.disclaimer = "Please acknowledge the payment disclaimer before submitting.";
+    }
+    return found;
+  }
+
+  // Once the form has been submitted, errors update live as each field is fixed.
+  const errors = submitted ? validate() : {};
+  const errorCount = Object.keys(errors).length;
+  const inputCls = (key: string) => (errors[key] ? `${inputClass} border-red-600` : inputClass);
+
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
+    setSubmitted(true);
 
-    if (!firstName.trim() || !lastName.trim()) {
-      setError("Enter the registrant’s first and last name.");
-      return;
-    }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
-      setError("Enter a valid email address for the confirmation.");
-      return;
-    }
-    if (digits(phone).length < 10) {
-      setError("Enter a phone number for the registrant.");
-      return;
-    }
-    if (!parish.trim() || !region) {
-      setError("Enter the parish and region.");
-      return;
-    }
-    if (participants.some((person) => !person.name.trim() || !person.category)) {
-      setError("Add a name and age group for each participant.");
-      return;
-    }
-    if (participants.some((person) => !person.hasAllergy)) {
-      setError("Tell us whether each participant has allergies.");
-      return;
-    }
-    if (participants.some((person) => person.hasAllergy === "yes" && !person.allergies.trim())) {
-      setError("List the allergies for each participant who has them.");
-      return;
-    }
-    if (quote.occupancy < 1) {
-      setError("Include at least one participant age 6 or older. Children ages 1–5 are free and do not set the room rate.");
-      return;
-    }
-    if (!airportTransportation) {
-      setError("Tell us whether airport transportation is needed.");
-      return;
-    }
-    if (!accessibilityNeeded) {
-      setError("Tell us whether accessibility accommodations are needed.");
-      return;
-    }
-    if (accessibilityNeeded === "yes" && !accessibilityDetails.trim()) {
-      setError("Describe the accessibility accommodations you need.");
-      return;
-    }
-    if (!emergencyName.trim() || digits(emergencyPhone).length < 10) {
-      setError("Enter an emergency contact name and phone number.");
-      return;
-    }
-    if (!testMode && !paymentMethod) {
-      setError("Choose a payment method.");
-      return;
-    }
-    if (!disclaimerAccepted) {
-      setError("Please acknowledge the payment disclaimer before submitting.");
+    if (Object.keys(validate()).length > 0) {
+      // Wait for the error messages to render, then bring the first one into view.
+      requestAnimationFrame(() => {
+        document
+          .querySelector("[data-field-error]")
+          ?.scrollIntoView({ behavior: "smooth", block: "center" });
+      });
       return;
     }
     if (!registrationEndpoint) {
@@ -200,6 +203,11 @@ export default function RegistrationForm() {
         allergies: person.hasAllergy === "yes" ? person.allergies.trim() : "",
       };
     });
+
+    if (quote.needsTeamFollowUp) {
+      await submitFollowUp(people);
+      return;
+    }
 
     const payload = {
       action: "create-checkout",
@@ -233,8 +241,7 @@ export default function RegistrationForm() {
         freeChildren: quote.freeChildren,
         occupancy: quote.occupancy,
         partySize: quote.partySize,
-        needsExtraRoom: quote.needsExtraRoom,
-        roomNote: quote.roomNote,
+        roomCount: quote.roomCount,
         total: quote.total,
       },
     };
@@ -258,37 +265,100 @@ export default function RegistrationForm() {
     }
   }
 
+  async function submitFollowUp(people: Record<string, unknown>[]) {
+    setSubmitting(true);
+    try {
+      const response = await fetch(registrationEndpoint, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({
+          action: "request-followup",
+          website,
+          firstName: firstName.trim(),
+          lastName: lastName.trim(),
+          email: email.trim(),
+          phone: phone.trim(),
+          parish: parish.trim(),
+          region,
+          airportTransportation: airportTransportation === "yes" ? "Yes" : "No",
+          accessibilityNeeded: accessibilityNeeded === "yes" ? "Yes" : "No",
+          accessibilityDetails: accessibilityNeeded === "yes" ? accessibilityDetails.trim() : "",
+          emergencyName: emergencyName.trim(),
+          emergencyPhone: emergencyPhone.trim(),
+          participants: people,
+          partySize: quote.partySize,
+        }),
+        redirect: "follow",
+      });
+      const result = (await response.json()) as { ok?: boolean; registrationId?: string; error?: string };
+      if (!response.ok || !result.ok) {
+        throw new Error(result.error || "We could not save your registration.");
+      }
+      setFollowUpDone({ id: result.registrationId ?? "", email: email.trim() });
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "We could not save your registration. Please try again in a moment.");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  if (followUpDone) {
+    return (
+      <section
+        role="status"
+        ref={(element) => element?.scrollIntoView({ behavior: "smooth", block: "center" })}
+        className="rounded-2xl border border-brand/30 bg-brand/5 p-6 shadow-sm sm:p-8"
+      >
+        <h3 className="text-lg font-semibold text-brand">Thank you. We have your registration details.</h3>
+        <p className="mt-3 text-sm leading-relaxed">
+          Someone from our team will contact you to complete your registration. Your group has more than four
+          people, and each room holds a maximum of four, so our team will work out the best room arrangement and
+          payment with you.
+        </p>
+        <p className="mt-3 text-sm leading-relaxed text-muted">
+          A confirmation is on its way to {followUpDone.email}.
+          {followUpDone.id ? ` Your reference is ${followUpDone.id}.` : ""} You do not need to call us.
+        </p>
+      </section>
+    );
+  }
+
   return (
-    <form onSubmit={onSubmit} className="space-y-8">
+    <form onSubmit={onSubmit} noValidate className="space-y-8">
       <section className="rounded-2xl border border-border bg-surface p-6 shadow-sm sm:p-8">
         <h3 className="text-lg font-semibold">Registrant</h3>
         <div className="mt-5 grid gap-4 sm:grid-cols-2">
           <label className="block text-sm font-medium">
             First name
-            <input className={inputClass} value={firstName} onChange={(event) => setFirstName(event.target.value)} autoComplete="given-name" required />
+            <input className={inputCls("firstName")} value={firstName} onChange={(event) => setFirstName(event.target.value)} autoComplete="given-name" required />
+            <FieldError message={errors.firstName} />
           </label>
           <label className="block text-sm font-medium">
             Last name
-            <input className={inputClass} value={lastName} onChange={(event) => setLastName(event.target.value)} autoComplete="family-name" required />
+            <input className={inputCls("lastName")} value={lastName} onChange={(event) => setLastName(event.target.value)} autoComplete="family-name" required />
+            <FieldError message={errors.lastName} />
           </label>
           <label className="block text-sm font-medium sm:col-span-2">
             Email
-            <input className={inputClass} type="email" value={email} onChange={(event) => setEmail(event.target.value)} autoComplete="email" required />
+            <input className={inputCls("email")} type="email" value={email} onChange={(event) => setEmail(event.target.value)} autoComplete="email" required />
+            <FieldError message={errors.email} />
             <span className="mt-1.5 block text-xs font-normal text-muted">
               The confirmation, with your full submission, is sent to this address.
             </span>
           </label>
           <label className="block text-sm font-medium">
             Phone
-            <input className={inputClass} type="tel" value={phone} onChange={(event) => setPhone(event.target.value)} autoComplete="tel" required />
+            <input className={inputCls("phone")} type="tel" value={phone} onChange={(event) => setPhone(event.target.value)} autoComplete="tel" required />
+            <FieldError message={errors.phone} />
           </label>
           <label className="block text-sm font-medium">
             Parish
-            <input className={inputClass} value={parish} onChange={(event) => setParish(event.target.value)} required />
+            <input className={inputCls("parish")} value={parish} onChange={(event) => setParish(event.target.value)} required />
+            <FieldError message={errors.parish} />
           </label>
           <label className="block text-sm font-medium">
             Region
-            <select className={inputClass} value={region} onChange={(event) => setRegion(event.target.value)} required>
+            <select className={inputCls("region")} value={region} onChange={(event) => setRegion(event.target.value)} required>
               <option value="">Select a region</option>
               {regions.map((item) => (
                 <option key={item} value={item}>
@@ -296,6 +366,7 @@ export default function RegistrationForm() {
                 </option>
               ))}
             </select>
+            <FieldError message={errors.region} />
           </label>
         </div>
       </section>
@@ -303,29 +374,34 @@ export default function RegistrationForm() {
       <section className="rounded-2xl border border-border bg-surface p-6 shadow-sm sm:p-8">
         <h3 className="text-lg font-semibold">Participants</h3>
         <p className="mt-2 text-sm leading-relaxed text-muted">
-          List everyone in this registration, including yourself. The price is chosen from this list.
-          Children ages 1–5 are free and are not counted, so three adults plus a child under 5 are charged
-          as a family of 3, while the room booked is for all four people. Young Adult is ages 13–35, Adult
-          is ages 36–59, and Senior is ages 60 and older.
-          Those three groups use the adult rate. Ages 6–12 use the child rate when the group is larger than
-          the room rate.
+          List everyone in this registration, including yourself. Your package updates below as you add people.
         </p>
+        <details className="mt-3 rounded-xl border border-border px-4 py-3 text-sm">
+          <summary className="cursor-pointer font-semibold text-brand">Age groups and pricing</summary>
+          <p className="mt-3 leading-relaxed text-muted">
+            Young Adult (13–35), Adult (36–59) and Senior (60+) all use the adult rate. Ages 6–12 use the child
+            rate. Children ages 1–5 are free. Each room holds up to four people, children ages 1–5 included.
+            For more than four people, complete the form and our team will contact you to finish your
+            registration. Each registration needs at least one adult.
+          </p>
+        </details>
         <div className="mt-5 space-y-4">
           {participants.map((person, index) => (
             <div key={person.id} className="grid gap-4 rounded-xl border border-border p-4 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
               <label className="block text-sm font-medium">
                 Full name
                 <input
-                  className={inputClass}
+                  className={inputCls(`name-${person.id}`)}
                   value={person.name}
                   onChange={(event) => updateParticipant(person.id, { name: event.target.value })}
                   required
                 />
+                <FieldError message={errors[`name-${person.id}`]} />
               </label>
               <label className="block text-sm font-medium">
                 Age group
                 <select
-                  className={inputClass}
+                  className={inputCls(`category-${person.id}`)}
                   value={person.category}
                   onChange={(event) =>
                     updateParticipant(person.id, { category: event.target.value as AgeCategory | "" })
@@ -339,6 +415,7 @@ export default function RegistrationForm() {
                     </option>
                   ))}
                 </select>
+                <FieldError message={errors[`category-${person.id}`]} />
               </label>
               <button
                 type="button"
@@ -369,17 +446,19 @@ export default function RegistrationForm() {
                     </label>
                   ))}
                 </div>
+                <FieldError message={errors[`allergy-${person.id}`]} />
               </fieldset>
               {person.hasAllergy === "yes" && (
                 <label className="block text-sm font-medium sm:col-span-3">
                   Allergies
                   <textarea
-                    className={`${inputClass} min-h-20`}
+                    className={`${inputCls(`allergies-${person.id}`)} min-h-20`}
                     value={person.allergies}
                     onChange={(event) => updateParticipant(person.id, { allergies: event.target.value })}
                     placeholder="List each allergy"
                     required
                   />
+                  <FieldError message={errors[`allergies-${person.id}`]} />
                 </label>
               )}
               {person.category &&
@@ -399,6 +478,49 @@ export default function RegistrationForm() {
         >
           Add a participant
         </button>
+
+        <FieldError message={errors.participants} />
+        <div
+          aria-live="polite"
+          className="mt-6 rounded-xl border border-brand/30 bg-brand/5 p-4 text-sm"
+        >
+          {quote.needsTeamFollowUp ? (
+            <p className="font-medium text-brand">
+              Rooms hold a maximum of four people, and this registration has {quote.partySize}. Fill out the rest
+              of the form and someone from our team will contact you to complete your registration.
+            </p>
+          ) : !quote.base ? (
+            <p className="text-muted">
+              {quote.partySize === 0
+                ? "Choose an age group for each participant to see your package."
+                : "Add at least one adult (age 13 or older) to see your package."}
+            </p>
+          ) : (
+            <>
+              <p className="text-xs font-semibold uppercase tracking-wide text-brand">Your package · 1 room</p>
+              <div className="mt-2 flex flex-wrap items-baseline justify-between gap-x-4">
+                <span>
+                  <span className="font-semibold">{quote.base.label}</span>
+                  <span className="block text-xs text-muted">
+                    {quote.adultCount} {quote.adultCount === 1 ? "adult" : "adults"}
+                    {quote.childCount > 0 &&
+                      ` and ${quote.childCount} ${quote.childCount === 1 ? "child" : "children"} (6–12)`}
+                    {quote.extraAdults > 0 &&
+                      ` · includes ${quote.extraAdults} extra ${quote.extraAdults === 1 ? "adult" : "adults"} at ${formatUsd(quote.extraAdultRate)}`}
+                    {quote.extraChildren > 0 &&
+                      ` · includes ${quote.extraChildren} extra ${quote.extraChildren === 1 ? "child" : "children"} at ${formatUsd(quote.extraChildRate)}`}
+                  </span>
+                </span>
+                <span className="font-semibold">{formatUsd(quote.total)}</span>
+              </div>
+              {quote.freeChildren > 0 && (
+                <p className="mt-2 text-xs text-muted">
+                  {quote.freeChildren} {quote.freeChildren === 1 ? "child" : "children"} ages 1–5 free.
+                </p>
+              )}
+            </>
+          )}
+        </div>
       </section>
 
       <section className="rounded-2xl border border-border bg-surface p-6 shadow-sm sm:p-8">
@@ -421,6 +543,7 @@ export default function RegistrationForm() {
             </label>
           ))}
         </div>
+        <FieldError message={errors.airport} />
       </section>
 
       <section className="rounded-2xl border border-border bg-surface p-6 shadow-sm sm:p-8">
@@ -442,15 +565,17 @@ export default function RegistrationForm() {
             </label>
           ))}
         </div>
+        <FieldError message={errors.accessibility} />
         {accessibilityNeeded === "yes" && (
           <label className="mt-4 block text-sm font-medium">
             What accommodations are needed?
             <textarea
-              className={`${inputClass} min-h-28`}
+              className={`${inputCls("accessibilityDetails")} min-h-28`}
               value={accessibilityDetails}
               onChange={(event) => setAccessibilityDetails(event.target.value)}
               required
             />
+            <FieldError message={errors.accessibilityDetails} />
           </label>
         )}
       </section>
@@ -460,29 +585,33 @@ export default function RegistrationForm() {
         <div className="mt-5 grid gap-4 sm:grid-cols-2">
           <label className="block text-sm font-medium">
             Full name
-            <input className={inputClass} value={emergencyName} onChange={(event) => setEmergencyName(event.target.value)} autoComplete="name" required />
+            <input className={inputCls("emergencyName")} value={emergencyName} onChange={(event) => setEmergencyName(event.target.value)} autoComplete="name" required />
+            <FieldError message={errors.emergencyName} />
           </label>
           <label className="block text-sm font-medium">
             Phone
-            <input className={inputClass} type="tel" value={emergencyPhone} onChange={(event) => setEmergencyPhone(event.target.value)} required />
+            <input className={inputCls("emergencyPhone")} type="tel" value={emergencyPhone} onChange={(event) => setEmergencyPhone(event.target.value)} required />
+            <FieldError message={errors.emergencyPhone} />
           </label>
         </div>
       </section>
 
+      {!quote.needsTeamFollowUp && (
+      <>
       <section className="rounded-2xl border border-border bg-surface-muted p-6 sm:p-8">
         <h3 className="text-lg font-semibold">Estimated total</h3>
         <p className="mt-1 text-sm text-muted">{tierLabels[tier]}</p>
         <dl className="mt-4 space-y-2 text-sm">
-          {quote.roomLabel && (
+          {quote.roomCount > 0 && (
             <div className="flex justify-between gap-4">
-              <dt>Room needed</dt>
-              <dd className="font-semibold">{quote.roomLabel}</dd>
+              <dt>Number of rooms</dt>
+              <dd className="font-semibold">{quote.roomCount}</dd>
             </div>
           )}
           <div className="flex justify-between gap-4">
             <dt>{quote.packageLabel || "Room rate"}</dt>
             <dd className="font-semibold">
-              {quote.packageId ? formatUsd(quote.packagePrice) : "Add someone age 6 or older"}
+              {quote.base ? formatUsd(quote.packagePrice) : "Add at least one adult"}
             </dd>
           </div>
           <div className="flex justify-between gap-4">
@@ -521,16 +650,10 @@ export default function RegistrationForm() {
           )}
         </dl>
         <p className="mt-4 text-xs leading-relaxed text-muted">
-          {quote.occupancy > 0
-            ? `Children ages 1–5 (${quote.freeChildren}) are free and are not counted in the price. ${quote.occupancy} ${quote.occupancy === 1 ? "person counts" : "people count"} toward the rate. The room needed fits all ${quote.partySize} ${quote.partySize === 1 ? "person" : "people"}.`
-            : "Children ages 1–5 are free and are not counted. Add someone age 6 or older to set the room rate."}
+          {quote.roomCount > 0
+            ? `Children ages 1–5 (${quote.freeChildren}) are free and are not counted in the price. ${quote.occupancy} ${quote.occupancy === 1 ? "person counts" : "people count"} toward the package.`
+            : "Children ages 1–5 are free and are not counted. Add at least one adult (age 13 or older) to set your package."}
         </p>
-        {quote.needsExtraRoom && (
-          <p className="mt-3 text-sm font-medium text-brand">
-            This group has more than four people. The registration team will be noted that extra room space
-            is needed.
-          </p>
-        )}
         {testMode && (
           <p className="mt-4 rounded-xl border border-brand/30 bg-white px-4 py-3 text-sm text-brand">
             Test payment is on. Card pay in full charges {formatUsd(testPaymentAmount)}. Card installments charge{" "}
@@ -540,7 +663,7 @@ export default function RegistrationForm() {
             <span className="font-medium">?test=</span> in the address to take a real payment.
           </p>
         )}
-        {quote.occupancy > 0 && (
+        {quote.roomCount > 0 && (
           <fieldset className="mt-6 space-y-3">
             <legend className="text-sm font-semibold text-foreground">Payment method</legend>
             {!testMode && (
@@ -572,9 +695,10 @@ export default function RegistrationForm() {
                 </span>
               </label>
             ))}
+            <FieldError message={errors.paymentMethod} />
           </fieldset>
         )}
-        {quote.occupancy > 0 && showInstallments && (
+        {quote.roomCount > 0 && showInstallments && (
           <fieldset className="mt-6 space-y-3">
             <legend className="text-sm font-semibold text-foreground">How would you like to pay?</legend>
             <label className="flex items-start gap-3 text-sm">
@@ -634,13 +758,16 @@ export default function RegistrationForm() {
           />
           <span>
             {`I understand Stripe will charge ${
-              quote.occupancy > 0 ? formatUsd(dueToday) : "the amount due"
+              quote.roomCount > 0 ? formatUsd(dueToday) : "the amount due"
             } today${
               selectedPlan === "installments" ? `, and the remaining balance on ${balanceDueLabel}` : ""
             }. This website does not store my payment details.`}
           </span>
         </label>
+        <FieldError message={errors.disclaimer} />
       </section>
+      </>
+      )}
 
       <div className="absolute -left-[9999px]" aria-hidden="true">
         <label>
@@ -649,6 +776,13 @@ export default function RegistrationForm() {
         </label>
       </div>
 
+      {errorCount > 0 && (
+        <p className="rounded-xl border border-red-300 bg-red-50 px-4 py-3 text-sm font-medium text-red-800" role="alert">
+          {errorCount === 1
+            ? "Please fix 1 item highlighted above before continuing."
+            : `Please fix ${errorCount} items highlighted above before continuing.`}
+        </p>
+      )}
       {error && (
         <p className="rounded-xl border border-brand/30 bg-brand/5 px-4 py-3 text-sm text-brand" role="alert">
           {error}
@@ -657,12 +791,16 @@ export default function RegistrationForm() {
 
       <button
         type="submit"
-        disabled={submitting || quote.occupancy < 1}
+        disabled={submitting}
         className="inline-flex items-center justify-center rounded-full bg-accent px-6 py-3 text-sm font-semibold text-brand-dark transition-colors hover:bg-accent-light disabled:opacity-60"
       >
         {submitting
-          ? "Opening Stripe…"
-          : quote.occupancy < 1
+          ? quote.needsTeamFollowUp
+            ? "Submitting…"
+            : "Opening Stripe…"
+          : quote.needsTeamFollowUp
+            ? "Submit for team follow-up"
+          : quote.roomCount < 1
             ? "Continue to payment"
             : `${testMode ? "Continue to test payment" : "Continue to payment"} · ${formatUsd(dueToday)}`}
       </button>

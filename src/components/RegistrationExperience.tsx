@@ -1,7 +1,7 @@
 import SectionHeading from "@/components/SectionHeading";
 import RegistrationForm from "@/components/RegistrationForm";
 import { conference } from "@/lib/site-content";
-import { extraRates, formatUsd, includedBenefits, packages } from "@/lib/registration";
+import { extraRates, formatUsd, includedBenefits, packageIncludedText, packages } from "@/lib/registration";
 
 export default function RegistrationExperience() {
   return (
@@ -34,18 +34,29 @@ export default function RegistrationExperience() {
         <section className="mt-8">
           <h2 className="text-lg font-semibold">Package rates</h2>
           <p className="mt-2 text-sm leading-relaxed text-muted">
-            Early bird pricing ends January 31, 2027. Regular pricing starts February 1, 2027. The room rate
-            follows how many people count toward the price. Children ages 1–5 are free and are not counted, so
-            three adults plus a child under 5 are charged the family of 3 rate. The room booked still fits
-            everyone in the group, so that same registration needs a family of 4 room. Anyone past four people
-            in the priced rate is added at the extra adult or child rate. A group of more than four people is
-            noted for the registration team because extra room space is needed.
+            Early bird pricing ends January 31, 2027. Regular pricing starts February 1, 2027. Adult rates apply
+            to ages 13 and older, child rates to ages 6–12, and children ages 1–5 are free.
           </p>
+          <details className="mt-3 rounded-2xl border border-border bg-surface px-4 py-3 text-sm">
+            <summary className="cursor-pointer font-semibold text-brand">How pricing works</summary>
+            <ul className="mt-3 list-disc space-y-2 pl-5 leading-relaxed text-muted">
+              <li>One room is one base package. Your party is matched to the largest package it fully fills.</li>
+              <li>
+                Anyone beyond what the package includes in that room is added at the extra adult or extra child
+                rate, for example 1 adult and 1 child is Single Occupancy plus one extra child.
+              </li>
+              <li>
+                A room holds a maximum of four people, children ages 1–5 included. For a group of more than four,
+                fill out the registration and someone from our team will contact you to complete it.
+              </li>
+              <li>Every registration needs at least one adult (13+). Children ages 1–5 are free.</li>
+            </ul>
+          </details>
           <div className="mt-4 overflow-x-auto rounded-2xl border border-border">
             <table className="w-full min-w-[36rem] text-left text-sm">
               <thead className="bg-brand text-white">
                 <tr>
-                  <th className="px-4 py-3 font-semibold">Package type</th>
+                  <th className="px-4 py-3 font-semibold">Base Package Type</th>
                   <th className="px-4 py-3 font-semibold">Early bird</th>
                   <th className="px-4 py-3 font-semibold">Regular</th>
                   <th className="px-4 py-3 font-semibold">Included</th>
@@ -58,7 +69,7 @@ export default function RegistrationExperience() {
                     <td className="px-4 py-3">{formatUsd(item.earlyBird)}</td>
                     <td className="px-4 py-3">{formatUsd(item.regular)}</td>
                     <td className="px-4 py-3">
-                      {item.included} {item.included === 1 ? "person" : "people"}
+                      {packageIncludedText(item)}
                     </td>
                   </tr>
                 ))}
