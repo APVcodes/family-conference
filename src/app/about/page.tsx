@@ -85,7 +85,7 @@ export default function AboutPage() {
         </div>
 
         <div className="mt-16">
-          <SectionHeading eyebrow="Guests" title="Chief Guest & Main Speaker" />
+          <SectionHeading eyebrow="Guests" title="Chief guest & main speaker" />
           <div className="mt-10 grid gap-6 sm:grid-cols-2">
             {speakers.map((speaker) => (
               <article
